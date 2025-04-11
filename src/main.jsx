@@ -1,13 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import 'aframe'  // Import A-Frame first
 import './index.css'
 import App from './App.jsx'
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+// Register A-Frame component before rendering
 AFRAME.registerComponent('random-fly', {
   schema: {
     speed: { type: 'number', default: 3000 }
@@ -37,3 +34,26 @@ AFRAME.registerComponent('random-fly', {
     setRandomPosition();
   }
 });
+
+// Register additional components if needed
+AFRAME.registerComponent('handle-img-load', {
+  init: function() {
+    this.el.addEventListener('loaded', () => {
+      const mesh = this.el.getObject3D('mesh');
+      if (mesh) {
+        const texture = mesh.material.map;
+        if (texture) {
+          texture.minFilter = THREE.LinearFilter;
+          texture.generateMipmaps = false;
+        }
+      }
+    });
+  }
+});
+
+// Create root and render app
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
