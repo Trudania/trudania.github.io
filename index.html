@@ -75,6 +75,12 @@
           scene.appendChild(fx);
         }
       });
+
+      if (myObject && typeof myObject.create === 'function') {
+        myObject.create();
+      } else {
+        console.error('myObject or create method is not available');
+      }
     </script>
   </head>
   <body>
@@ -82,22 +88,22 @@
       <!-- Preloaded Assets -->
       <a-assets>
         <img id="img1" src="assets/img/img1.png">
-        <img id="infoSvg1" src="assets/img/info1.svg">
-        <img id="infoSvg2" src="assets/img/info2.svg">
-        <img id="infoSvg3" src="assets/img/info3.svg">
-        <img id="infoSvg4" src="assets/img/info4.svg">
+        <img id="infoSvg1" src="/assets/images/info1.svg">
+        <img id="infoSvg2" src="/assets/images/info2.svg">
+        <img id="infoSvg3" src="/assets/images/info3.svg">
+        <img id="infoSvg4" src="/assets/images/info4.svg">
 
-        <img id="infobutton1" src="assets/img/infobutton1.svg">
-        <img id="infobutton2" src="assets/img/infobutton2.svg">
-        <img id="infobutton3" src="assets/img/infobutton3.svg">
-        <img id="infobutton4" src="assets/img/infobutton4.svg">
+        <img id="infobutton1" src="/assets/images/infobutton1.svg">
+        <img id="infobutton2" src="/assets/images/infobutton2.svg">
+        <img id="infobutton3" src="/assets/images/infobutton3.svg">
+        <img id="infobutton4" src="/assets/images/infobutton4.svg">
 
-        <img id="flyingEffect" src="assets/img/flyingeffect.png">
+        <img id="flyingEffect" src="/assets/images/flyingeffect.png">
 
-        <audio id="infoSound1" src="assets/audio/info1.mp3" preload="auto"></audio>
-        <audio id="infoSound2" src="assets/audio/info2.mp3" preload="auto"></audio>
-        <audio id="infoSound3" src="assets/audio/info3.mp3" preload="auto"></audio>
-        <audio id="infoSound4" src="assets/audio/info4.mp3" preload="auto"></audio>
+        <audio id="infoSound1" src="/assets/audio/info1.mp3" preload="auto"></audio>
+        <audio id="infoSound2" src="/assets/audio/info2.mp3" preload="auto"></audio>
+        <audio id="infoSound3" src="/assets/audio/info3.mp3" preload="auto"></audio>
+        <audio id="infoSound4" src="/assets/audio/info4.mp3" preload="auto"></audio>
       </a-assets>
 
       <!-- Big PNG Background Image -->
