@@ -4,51 +4,22 @@
     <meta charset="UTF-8" />
     <title>AR Info Panel</title>
     <script>
-        // Prevent popup.js error
-        window.myObject = {
-            create: function() {
-                return true;
-            }
-        };
-
-        // Suppress WebGL warnings
+        window.myObject = { create: function() { return true; } };
         const originalConsoleWarn = console.warn;
         const originalConsoleError = console.error;
-
-        console.warn = function() {
-            if (arguments[0] && (
-                arguments[0].includes('WebGL') ||
-                arguments[0].includes('GL_INVALID') ||
-                arguments[0].includes('texSubImage2D')
-            )) {
-                return;
-            }
-            originalConsoleWarn.apply(console, arguments);
-        };
-
-        console.error = function() {
-            if (arguments[0] && arguments[0].includes('popup.js')) {
-                return;
-            }
-            originalConsoleError.apply(console, arguments);
-        };
+        console.warn = function() { if (arguments[0] && (arguments[0].includes('WebGL') || arguments[0].includes('GL_INVALID') || arguments[0].includes('texSubImage2D'))) { return; } originalConsoleWarn.apply(console, arguments); };
+        console.error = function() { if (arguments[0] && arguments[0].includes('popup.js')) { return; } originalConsoleError.apply(console, arguments); };
     </script>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script>
         function showInfoPanel(infoId, soundId) {
-            // Hide all panels and stop all sounds
             for (let i = 1; i <= 4; i++) {
                 const panel = document.querySelector(`#infoPanel${i}`);
                 const sound = document.querySelector(`#infoSound${i}`);
                 if (panel) panel.setAttribute('visible', false);
-                if (sound) {
-                    sound.pause();
-                    sound.currentTime = 0;
-                }
+                if (sound) { sound.pause(); sound.currentTime = 0; }
             }
-
-            // Show selected panel and play selected sound
             const selectedPanel = document.querySelector(`#${infoId}`);
             const selectedSound = document.querySelector(`#${soundId}`);
             if (selectedPanel) selectedPanel.setAttribute('visible', true);
@@ -64,81 +35,40 @@
         arjs="detectionMode: mono_and_matrix; debugUIEnabled: true; sourceType: webcam; patternRatio: 0.5">
 
         <a-assets timeout="10000">
-            <img id="img1"
-                src="./public/assets/images/img1.png"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
-            <img id="infoSvg1"
-                src="./public/assets/images/info1.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infoSvg2"
-                src="./public/assets/images/info2.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infoSvg3"
-                src="./public/assets/images/info3.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infoSvg4"
-                src="./public/assets/images/info4.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
-            <img id="infobutton1"
-                src="./public/assets/images/infobutton1.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infobutton2"
-                src="./public/assets/images/infobutton2.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infobutton3"
-                src="./public/assets/images/infobutton3.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infobutton4"
-                src="./public/assets/images/infobutton4.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
-            <audio id="infoSound1"
-                src="./public/assets/audio/info1.mp3"
-                preload="auto"
-                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
-            <audio id="infoSound2"
-                src="./public/assets/audio/info2.mp3"
-                preload="auto"
-                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
-            <audio id="infoSound3"
-                src="./public/assets/audio/info3.mp3"
-                preload="auto"
-                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
-            <audio id="infoSound4"
-                src="./public/assets/audio/info4.mp3"
-                preload="auto"
-                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <img id="img1" src="./public/assets/images/img1.png" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg1" src="./public/assets/images/info1.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg2" src="./public/assets/images/info2.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg3" src="./public/assets/images/info3.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg4" src="./public/assets/images/info4.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton1" src="./public/assets/images/infobutton1.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton2" src="./public/assets/images/infobutton2.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton3" src="./public/assets/images/infobutton3.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton4" src="./public/assets/images/infobutton4.svg" crossorigin="anonymous" onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <audio id="infoSound1" src="./public/assets/audio/info1.mp3" preload="auto" onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound2" src="./public/assets/audio/info2.mp3" preload="auto" onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound3" src="./public/assets/audio/info3.mp3" preload="auto" onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound4" src="./public/assets/audio/info4.mp3" preload="auto" onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls-enabled="false"></a-camera>
+        <a-camera position="0 0 0" look-controls-enabled="false" far="10"></a-camera>
 
         <a-image
             id="baseImage"
             src="#img1"
             position="0 0 -1"
-            width="1"
-            height="0.5"
+            scale="0.5 0.5 0.5"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
+
+        <a-plane color="red" width="1" height="0.75" position="0 0 -1.5"></a-plane>
 
         <a-image
             id="infobutton1"
             src="#infobutton1"
-            width="0.3"
-            height="0.3"
+            width="0.15"
+            height="0.15"
             class="clickable"
-            position="-0.7 0.6 -0.95"
+            position="-0.35 0.3 -0.9"
             material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel1', 'infoSound1')">
         </a-image>
@@ -146,19 +76,19 @@
             id="infoPanel1"
             src="#infoSvg1"
             visible="false"
-            position="-0.7 0.2 -0.9"
-            width="0.423 * 0.8"
-            height="0.5 * 0.8"
+            position="-0.35 0.1 -0.85"
+            width="0.423 * 0.4"
+            height="0.5 * 0.4"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
 
         <a-image
             id="infobutton2"
             src="#infobutton2"
-            width="0.3"
-            height="0.3"
+            width="0.15"
+            height="0.15"
             class="clickable"
-            position="0.7 0.8 -0.95"
+            position="0.35 0.4 -0.9"
             material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel2', 'infoSound2')">
         </a-image>
@@ -166,19 +96,19 @@
             id="infoPanel2"
             src="#infoSvg2"
             visible="false"
-            position="0.7 0.4 -0.9"
-            width="0.423 * 0.8"
-            height="0.5 * 0.8"
+            position="0.35 0.2 -0.85"
+            width="0.423 * 0.4"
+            height="0.5 * 0.4"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
 
         <a-image
             id="infobutton3"
             src="#infobutton3"
-            width="0.3"
-            height="0.3"
+            width="0.15"
+            height="0.15"
             class="clickable"
-            position="0.3 0.8 -0.95"
+            position="0.15 0.4 -0.9"
             material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel3', 'infoSound3')">
         </a-image>
@@ -186,19 +116,19 @@
             id="infoPanel3"
             src="#infoSvg3"
             visible="false"
-            position="0.3 0.4 -0.9"
-            width="0.423 * 0.8"
-            height="0.5 * 0.8"
+            position="0.15 0.2 -0.85"
+            width="0.423 * 0.4"
+            height="0.5 * 0.4"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
 
         <a-image
             id="infobutton4"
             src="#infobutton4"
-            width="0.3"
-            height="0.3"
+            width="0.15"
+            height="0.15"
             class="clickable"
-            position="-0.3 0.8 -0.95"
+            position="-0.15 0.4 -0.9"
             material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel4', 'infoSound4')">
         </a-image>
@@ -206,9 +136,9 @@
             id="infoPanel4"
             src="#infoSvg4"
             visible="false"
-            position="-0.3 0.4 -0.9"
-            width="0.423 * 0.8"
-            height="0.5 * 0.8"
+            position="-0.15 0.2 -0.85"
+            width="0.423 * 0.4"
+            height="0.5 * 0.4"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
 
