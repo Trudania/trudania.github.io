@@ -54,59 +54,6 @@
             if (selectedPanel) selectedPanel.setAttribute('visible', true);
             if (selectedSound) selectedSound.play();
         }
-
-        // Register random fly animation
-        AFRAME.registerComponent('random-fly', {
-            schema: {
-                speed: { type: 'number', default: 3000 }
-            },
-            init: function () {
-                this.startRandomAnimation();
-            },
-            startRandomAnimation: function () {
-                const el = this.el;
-                const speed = this.data.speed;
-
-                function setRandomPosition() {
-                    const x = (Math.random() - 0.5) * 1.5;   // Further adjust range for AR
-                    const y = 0.1 + Math.random() * 0.8;     // Further adjust range for AR
-                    const z = 0.01 + Math.random() * 0.1;  // Position slightly in front
-
-                    el.setAttribute('animation__move', {
-                        property: 'position',
-                        to: `${x} ${y} ${z}`,
-                        dur: speed,
-                        easing: 'easeInOutSine',
-                        loop: false
-                    });
-                }
-
-                setInterval(setRandomPosition, speed);
-                setRandomPosition();
-            }
-        });
-
-        // Create multiple flying effects when scene loads
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = document.querySelector('a-scene');
-            const flyingEffectsContainer = document.querySelector('#flyingEffects');
-            const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
-
-            scene.addEventListener('loaded', () => {
-                for (let i = 0; i < 20; i++) {
-                    const fx = flyingEffectTemplate.cloneNode(true);
-                    fx.setAttribute('id', `flyingEffect${i}`);
-                    fx.setAttribute('visible', true);
-
-                    const x = (Math.random() - 0.5) * 1.5;   // Further adjust range for AR
-                    const y = 0.1 + Math.random() * 0.8;     // Further adjust range for AR
-                    const z = 0.01 + Math.random() * 0.1;  // Position slightly in front
-
-                    fx.setAttribute('position', `${x} ${y} ${z}`);
-                    flyingEffectsContainer.appendChild(fx);
-                }
-            });
-        });
     </script>
 </head>
 <body>
@@ -156,11 +103,6 @@
                 crossorigin="anonymous"
                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-            <img id="flyingEffect"
-                src="./public/assets/images/flyingeffect.png"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
             <audio id="infoSound1"
                 src="./public/assets/audio/info1.mp3"
                 preload="auto"
@@ -186,9 +128,7 @@
             src="#img1"
             position="0 0 -1"
             width="2"
-            height="auto"
-            scale="1 1 1"
-            material="shader: flat; npot: true; transparent: true">
+            height="1.5" material="shader: flat; npot: true; transparent: true">
         </a-image>
 
         <a-image
@@ -197,16 +137,14 @@
             width="0.2"
             height="0.2"
             class="clickable"
-            position="-0.7 0.6 -0.99"
-            material="shader: flat; npot: true; transparent: true"
+            position="-0.7 0.6 -0.9" material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel1', 'infoSound1')">
         </a-image>
         <a-image
             id="infoPanel1"
             src="#infoSvg1"
             visible="false"
-            position="-0.7 0.2 -0.99"
-            width="0.423 * 0.7"
+            position="-0.7 0.2 -0.9" width="0.423 * 0.7"
             height="0.5 * 0.7"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
@@ -217,16 +155,14 @@
             width="0.2"
             height="0.2"
             class="clickable"
-            position="0.7 0.8 -0.99"
-            material="shader: flat; npot: true; transparent: true"
+            position="0.7 0.8 -0.9" material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel2', 'infoSound2')">
         </a-image>
         <a-image
             id="infoPanel2"
             src="#infoSvg2"
             visible="false"
-            position="0.7 0.4 -0.99"
-            width="0.423 * 0.7"
+            position="0.7 0.4 -0.9" width="0.423 * 0.7"
             height="0.5 * 0.7"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
@@ -237,16 +173,14 @@
             width="0.2"
             height="0.2"
             class="clickable"
-            position="0.3 0.8 -0.99"
-            material="shader: flat; npot: true; transparent: true"
+            position="0.3 0.8 -0.9" material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel3', 'infoSound3')">
         </a-image>
         <a-image
             id="infoPanel3"
             src="#infoSvg3"
             visible="false"
-            position="0.3 0.4 -0.99"
-            width="0.423 * 0.7"
+            position="0.3 0.4 -0.9" width="0.423 * 0.7"
             height="0.5 * 0.7"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
@@ -257,56 +191,18 @@
             width="0.2"
             height="0.2"
             class="clickable"
-            position="-0.3 0.8 -0.99"
-            material="shader: flat; npot: true; transparent: true"
+            position="-0.3 0.8 -0.9" material="shader: flat; npot: true; transparent: true"
             onclick="showInfoPanel('infoPanel4', 'infoSound4')">
         </a-image>
         <a-image
             id="infoPanel4"
             src="#infoSvg4"
             visible="false"
-            position="-0.3 0.4 -0.99"
-            width="0.423 * 0.7"
+            position="-0.3 0.4 -0.9" width="0.423 * 0.7"
             height="0.5 * 0.7"
             material="shader: flat; npot: true; transparent: true">
         </a-image>
 
-        <a-entity id="flyingEffects">
-            <a-image
-                id="flyingEffectTemplate"
-                src="#flyingEffect"
-                width="0.1"
-                height="0.1"
-                material="transparent: true; opacity: 0.8; shader: flat; npot: true"
-                random-fly=""
-                visible="false">
-            </a-image>
-        </a-entity>
-
         </a-scene>
-
-    <script>
-        // Modify the flying effect creation for AR
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = document.querySelector('a-scene');
-            const flyingEffectsContainer = document.querySelector('#flyingEffects');
-            const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
-
-            scene.addEventListener('loaded', () => {
-                for (let i = 0; i < 20; i++) {
-                    const fx = flyingEffectTemplate.cloneNode(true);
-                    fx.setAttribute('id', `flyingEffect${i}`);
-                    fx.setAttribute('visible', true);
-
-                    const x = (Math.random() - 0.5) * 1.5;   // Further adjust range for AR
-                    const y = 0.1 + Math.random() * 0.8;     // Further adjust range for AR
-                    const z = 0.01 + Math.random() * 0.1;  // Position slightly in front
-
-                    fx.setAttribute('position', `${x} ${y} ${z}`);
-                    flyingEffectsContainer.appendChild(fx);
-                }
-            });
-        });
-    </script>
 </body>
 </html>
