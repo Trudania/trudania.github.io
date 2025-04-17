@@ -181,18 +181,18 @@
 
         <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls="smoothingThreshold: 0.2;"></a-camera>
 
-        <a-entity>
+        <a-entity id="imageContainer" position="0 0 -1.2">
             <a-image
                 id="baseImage"
                 src="#img1"
-                position="0 0 -1.2" width="2"        height="1.25"        material="shader: flat; npot: true; transparent: true">
+                width="2"        height="1.25"        material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity position="0 0 0">
+            <a-entity>
                 <a-image
                     src="#infobutton1"
                     width="0.1"        height="0.1"        class="clickable"
-                    position="-0.8 0.5 -1.1" material="shader: flat; npot: true; transparent: true"
+                    position="-0.8 0.5 0.01" material="shader: flat; npot: true; transparent: true"
                     onclick="showInfoPanel('infoPanel1', 'infoSound1')">
                 </a-image>
             </a-entity>
@@ -200,14 +200,14 @@
                 id="infoPanel1"
                 src="#infoSvg1"
                 visible="false"
-                position="-0.8 0.2 -1.05" width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                position="-0.8 0.2 0.02" width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity position="0 0 0">
+            <a-entity>
                 <a-image
                     src="#infobutton2"
                     width="0.1"        height="0.1"        class="clickable"
-                    position="0.8 0.5 -1.1"  material="shader: flat; npot: true; transparent: true"
+                    position="0.8 0.5 0.01"  material="shader: flat; npot: true; transparent: true"
                     onclick="showInfoPanel('infoPanel2', 'infoSound2')">
                 </a-image>
             </a-entity>
@@ -215,14 +215,14 @@
                 id="infoPanel2"
                 src="#infoSvg2"
                 visible="false"
-                position="0.8 0.2 -1.05"    width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                position="0.8 0.2 0.02"    width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity position="0 0 0">
+            <a-entity>
                 <a-image
                     src="#infobutton3"
                     width="0.1"        height="0.1"        class="clickable"
-                    position="0.2 0.9 -1.1"  material="shader: flat; npot: true; transparent: true"
+                    position="0.2 0.9 0.01"  material="shader: flat; npot: true; transparent: true"
                     onclick="showInfoPanel('infoPanel3', 'infoSound3')">
                 </a-image>
             </a-entity>
@@ -230,14 +230,14 @@
                 id="infoPanel3"
                 src="#infoSvg3"
                 visible="false"
-                position="0.2 0.6 -1.05"    width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                position="0.2 0.6 0.02"    width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity position="0 0 0">
+            <a-entity>
                 <a-image
                     src="#infobutton4"
                     width="0.1"        height="0.1"        class="clickable"
-                    position="-0.2 0.9 -1.1" material="shader: flat; npot: true; transparent: true"
+                    position="-0.2 0.9 0.01" material="shader: flat; npot: true; transparent: true"
                     onclick="showInfoPanel('infoPanel4', 'infoSound4')">
                 </a-image>
             </a-entity>
@@ -245,20 +245,20 @@
                 id="infoPanel4"
                 src="#infoSvg4"
                 visible="false"
-                position="-0.2 0.6 -1.05"   width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                position="-0.2 0.6 0.02"   width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
             </a-image>
+        </a-entity>
 
-            <a-entity id="flyingEffects">
-                <a-image
-                    id="flyingEffectTemplate"
-                    src="#flyingEffect"
-                    width="0.075"
-                    height="0.075"
-                    material="transparent: true; opacity: 0.8; shader: flat; npot: true"
-                    random-fly=""
-                    visible="false">
-                </a-image>
-            </a-entity>
+        <a-entity id="flyingEffects">
+            <a-image
+                id="flyingEffectTemplate"
+                src="#flyingEffect"
+                width="0.075"
+                height="0.075"
+                material="transparent: true; opacity: 0.8; shader: flat; npot: true"
+                random-fly=""
+                visible="false">
+            </a-image>
         </a-entity>
 
         </a-scene>
