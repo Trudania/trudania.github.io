@@ -186,7 +186,7 @@
                     id="infoPanel1"
                     src="#infoSvg1"
                     visible="true"
-                    position="-0.7 0.2 0.021" width="0.4"    height="0.5"
+                    position="-0.5 0.3 0.01" width="0.4"    height="0.5"
                     material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
@@ -196,7 +196,7 @@
                     id="infoPanel2"
                     src="#infoSvg2"
                     visible="true"
-                    position="-0.5 -0.5 0.021"    width="0.4"    height="0.5"
+                    position="-0.3 -0.3 0.01"    width="0.4"    height="0.5"
                     material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
@@ -206,7 +206,7 @@
                     id="infoPanel3"
                     src="#infoSvg3"
                     visible="true"
-                    position="0.5 -0.2 0.021"    width="0.4"    height="0.5"
+                    position="0.3 0.3 0.01"    width="0.4"    height="0.5"
                     material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
@@ -216,7 +216,7 @@
                     id="infoPanel4"
                     src="#infoSvg4"
                     visible="true"
-                    position="0.3 -0.2 0.021"   width="0.4"    height="0.5"
+                    position="0.5 -0.3 0.01"   width="0.4"    height="0.5"
                     material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
