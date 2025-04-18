@@ -183,41 +183,69 @@
 
             <a-entity position="0 0 0">
                 <a-image
+                    id="infobutton1"
+                    src="#infobutton1"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
+                    info-button-listener>
+                </a-image>
+                <a-image
                     id="infoPanel1"
                     src="#infoSvg1"
-                    visible="true"
-                    position="-0.5 0.3 0.01" width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                    visible="false"
+                    position="-0.6 0.01 0.01" width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
 
             <a-entity position="0 0 0">
+                <a-image
+                    id="infobutton2"
+                    src="#infobutton2"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
+                    info-button-listener>
+                </a-image>
                 <a-image
                     id="infoPanel2"
                     src="#infoSvg2"
-                    visible="true"
-                    position="-0.3 -0.3 0.01"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                    visible="false"
+                    position="-0.4 -0.2 0.01"    width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
 
             <a-entity position="0 0 0">
+                <a-image
+                    id="infobutton3"
+                    src="#infobutton3"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
+                    info-button-listener>
+                </a-image>
                 <a-image
                     id="infoPanel3"
                     src="#infoSvg3"
-                    visible="true"
-                    position="0.3 0.3 0.01"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                    visible="false"
+                    position="0.6 0.0141 0.01"    width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
 
             <a-entity position="0 0 0">
                 <a-image
+                    id="infobutton4"
+                    src="#infobutton4"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
+                    info-button-listener>
+                </a-image>
+                <a-image
                     id="infoPanel4"
                     src="#infoSvg4"
-                    visible="true"
-                    position="0.5 -0.3 0.01"   width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                    visible="false"
+                    position="0.2 0.0141 0.01"   width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
         </a-entity>
