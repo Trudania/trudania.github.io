@@ -36,22 +36,28 @@
         function showInfoPanel(infoId, soundId) {
             console.log('showInfoPanel called with:', infoId, soundId); // DEBUGGING LINE
 
-            // Hide all panels and stop all sounds
+            // Hide all panels and reset opacity
             for (let i = 1; i <= 4; i++) {
                 const panel = document.querySelector(`#infoPanel${i}`);
                 const sound = document.querySelector(`#infoSound${i}`);
-                if (panel) panel.setAttribute('visible', false);
+                if (panel) {
+                    panel.setAttribute('visible', false);
+                    panel.setAttribute('material', 'opacity: 0'); // Reset opacity
+                }
                 if (sound) {
                     sound.pause();
                     sound.currentTime = 0;
                 }
             }
 
-            // Show selected panel and play selected sound
+            // Show selected panel and play selected sound by setting opacity
             const selectedPanel = document.querySelector(`#${infoId}`);
             console.log('Selected Panel Element in showInfoPanel:', selectedPanel); // DEBUGGING LINE
             const selectedSound = document.querySelector(`#${soundId}`);
-            if (selectedPanel) selectedPanel.setAttribute('visible', true);
+            if (selectedPanel) {
+                selectedPanel.setAttribute('visible', true); // Ensure it's visible
+                selectedPanel.setAttribute('material', 'opacity: 1'); // Set opacity to 1
+            }
             if (selectedSound) selectedSound.play();
         }
 
