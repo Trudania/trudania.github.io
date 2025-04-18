@@ -193,7 +193,7 @@
                     id="infoPanel1"
                     src="#infoSvg1"
                     visible="false"
-                    position="-0.7 0.2 0.021" width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                    position="-0.7 0.2 0.01" width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
                 </a-image>
             </a-entity>
 
