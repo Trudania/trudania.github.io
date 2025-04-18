@@ -49,7 +49,7 @@
 
             // Show selected panel and play selected sound
             const selectedPanel = document.querySelector(`#${infoId}`);
-            console.log('Selected Panel Element:', selectedPanel); // NEW DEBUGGING LINE
+            console.log('Selected Panel Element in showInfoPanel:', selectedPanel); // DEBUGGING LINE
             const selectedSound = document.querySelector(`#${soundId}`);
             if (selectedPanel) selectedPanel.setAttribute('visible', true);
             if (selectedSound) selectedSound.play();
@@ -62,8 +62,10 @@
                 const infoSoundId = `infoSound${buttonNumber}`;
                 const self = this;
 
+                console.log('Info Button Listener Initialized for button:', buttonNumber, 'panel ID:', infoPanelId, 'sound ID:', infoSoundId); // DEBUGGING
+
                 this.el.addEventListener('click', function () {
-                    console.log('Button', buttonNumber, 'clicked'); // Debugging
+                    console.log('Button', buttonNumber, 'CLICKED!'); // CONFIRMING CLICK
                     showInfoPanel(infoPanelId, infoSoundId);
                 });
             }
