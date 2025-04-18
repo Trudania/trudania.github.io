@@ -187,7 +187,7 @@
                     src="#infobutton1"
                     width="0.1"        height="0.1"        class="clickable"
                     position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+                    onclick="document.querySelector('#infoPanel1').setAttribute('visible', true); document.querySelector('#infoPanel1').setAttribute('material', 'opacity: 1');">
                 </a-image>
                 <a-image
                     id="infoPanel1"
@@ -204,7 +204,7 @@
                     src="#infobutton2"
                     width="0.1"        height="0.1"        class="clickable"
                     position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+                    onclick="document.querySelector('#infoPanel2').setAttribute('visible', true); document.querySelector('#infoPanel2').setAttribute('material', 'opacity: 1');">
                 </a-image>
                 <a-image
                     id="infoPanel2"
@@ -221,7 +221,7 @@
                     src="#infobutton3"
                     width="0.1"        height="0.1"        class="clickable"
                     position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+                    onclick="document.querySelector('#infoPanel3').setAttribute('visible', true); document.querySelector('#infoPanel3').setAttribute('material', 'opacity: 1');">
                 </a-image>
                 <a-image
                     id="infoPanel3"
@@ -238,7 +238,7 @@
                     src="#infobutton4"
                     width="0.1"        height="0.1"        class="clickable"
                     position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+                    onclick="document.querySelector('#infoPanel4').setAttribute('visible', true); document.querySelector('#infoPanel4').setAttribute('material', 'opacity: 1');">
                 </a-image>
                 <a-image
                     id="infoPanel4"
