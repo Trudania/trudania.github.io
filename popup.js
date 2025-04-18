@@ -185,32 +185,40 @@
                 <a-image
                     id="infoPanel1"
                     src="#infoSvg1"
-                    visible="true" position="-0.7 0.2 0.021" width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: red"> </a-image>
+                    visible="true"
+                    position="-0.7 0.2 0.021" width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; color: red">
+                </a-image>
             </a-entity>
 
             <a-entity position="0 0 0">
                 <a-image
                     id="infoPanel2"
                     src="#infoSvg2"
-                    visible="true" position="-0.5 -0.5 0.021"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: green"> </a-image>
+                    visible="true"
+                    position="-0.5 -0.5 0.021"    width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; color: green">
+                </a-image>
             </a-entity>
 
             <a-entity position="0 0 0">
                 <a-image
                     id="infoPanel3"
                     src="#infoSvg3"
-                    visible="true" position="0.5 -0.2 0.021"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: blue"> </a-image>
+                    visible="true"
+                    position="0.5 -0.2 0.021"    width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; color: blue">
+                </a-image>
             </a-entity>
 
             <a-entity position="0 0 0">
                 <a-image
                     id="infoPanel4"
                     src="#infoSvg4"
-                    visible="true" position="0.3 -0.2 0.021"   width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: yellow"> </a-image>
+                    visible="true"
+                    position="0.3 -0.2 0.021"   width="0.4"    height="0.5"
+                    material="shader: flat; npot: true; color: yellow">
+                </a-image>
             </a-entity>
         </a-entity>
 
