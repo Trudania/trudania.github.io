@@ -57,6 +57,20 @@
             if (selectedSound) selectedSound.play();
         }
 
+        AFRAME.registerComponent('info-button-listener', {
+            init: function () {
+                const buttonNumber = this.el.id.slice(-1); // Get the number from the button ID
+                const infoPanelId = `infoPanel${buttonNumber}`;
+                const infoSoundId = `infoSound${buttonNumber}`;
+                const self = this;
+
+                this.el.addEventListener('click', function () {
+                    console.log('Button', buttonNumber, 'clicked'); // Debugging
+                    showInfoPanel(infoPanelId, infoSoundId);
+                });
+            }
+        });
+
         // Register random fly animation
         AFRAME.registerComponent('random-fly', {
             schema: {
@@ -192,10 +206,12 @@
 
             <a-entity position="0 0 0">
                 <a-image
+                    id="infobutton1"
                     src="#infobutton1"
                     width="0.1"        height="0.1"        class="clickable"
                     position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
-                    onclick="showInfoPanel('infoPanel1', 'infoSound1')">
+                    data-infopanel="infoPanel1" data-infosound="infoSound1"
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel1"
@@ -207,10 +223,12 @@
 
             <a-entity position="0 0 0">
                 <a-image
+                    id="infobutton2"
                     src="#infobutton2"
                     width="0.1"        height="0.1"        class="clickable"
                     position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
-                    onclick="showInfoPanel('infoPanel2', 'infoSound2')">
+                    data-infopanel="infoPanel2" data-infosound="infoSound2"
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel2"
@@ -222,10 +240,12 @@
 
             <a-entity position="0 0 0">
                 <a-image
+                    id="infobutton3"
                     src="#infobutton3"
                     width="0.1"        height="0.1"        class="clickable"
                     position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
-                    onclick="showInfoPanel('infoPanel3', 'infoSound3')">
+                    data-infopanel="infoPanel3" data-infosound="infoSound3"
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel3"
@@ -237,10 +257,12 @@
 
             <a-entity position="0 0 0">
                 <a-image
+                    id="infobutton4"
                     src="#infobutton4"
                     width="0.1"        height="0.1"        class="clickable"
                     position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
-                    onclick="showInfoPanel('infoPanel4', 'infoSound4')">
+                    data-infopanel="infoPanel4" data-infosound="infoSound4"
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel4"
