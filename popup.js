@@ -36,7 +36,7 @@
         function showInfoPanel(infoId, soundId) {
             console.log('showInfoPanel called with:', infoId, soundId); // DEBUGGING LINE
 
-            // Hide all panels and reset opacity
+            // Hide all panels and stop all sounds
             for (let i = 1; i <= 4; i++) {
                 const panel = document.querySelector(`#infoPanel${i}`);
                 const sound = document.querySelector(`#infoSound${i}`);
@@ -187,7 +187,7 @@
                     src="#infoSvg1"
                     visible="true"
                     position="-0.7 0.2 0.021" width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: red">
+                    material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
 
@@ -197,7 +197,7 @@
                     src="#infoSvg2"
                     visible="true"
                     position="-0.5 -0.5 0.021"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: green">
+                    material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
 
@@ -207,7 +207,7 @@
                     src="#infoSvg3"
                     visible="true"
                     position="0.5 -0.2 0.021"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: blue">
+                    material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
 
@@ -217,7 +217,7 @@
                     src="#infoSvg4"
                     visible="true"
                     position="0.3 -0.2 0.021"   width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; color: yellow">
+                    material="shader: flat; npot: true; transparent: true; opacity: 1">
                 </a-image>
             </a-entity>
         </a-entity>
