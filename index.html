@@ -127,35 +127,166 @@
 </head>
 <body>
     <a-scene
-    renderer="antialias: true; colorManagement: true;"
-    loading-screen="enabled: true"
-    vr-mode-ui="enabled: false"
-    arjs="detectionMode: mono_and_matrix; debugUIEnabled: true; sourceType: webcam; patternRatio: 0.5">
+        renderer="antialias: true; colorManagement: true;"
+        loading-screen="enabled: true"
+        vr-mode-ui="enabled: false"
+        arjs="detectionMode: mono_and_matrix; debugUIEnabled: true; sourceType: webcam; patternRatio: 0.5">
 
-    <a-assets timeout="10000">
-        <img id="testImage" src="https://via.placeholder.com/50" crossorigin="anonymous">
-    </a-assets>
+        <a-assets timeout="10000">
+            <img id="img1"
+                src="./public/assets/images/img1.png"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-    <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls="smoothingThreshold: 0.2;"></a-camera>
+            <img id="infoSvg1"
+                src="https://via.placeholder.com/150"
+                crossorigin="anonymous"
+                onerror="console.error('Error loading image:', this.src, 'Status:', this.status);">
 
-    <a-box position="0 0 -1" color="red"></a-box>
+            <img id="infoSvg2"
+                src="./public/assets/images/info2.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg3"
+                src="./public/assets/images/info3.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg4"
+                src="./public/assets/images/info4.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-    <a-image
-        id="testPanel"
-        src="#testImage"
-        position="0 0 -0.5"
-        width="0.2"
-        height="0.2"
-        material="shader: flat; transparent: true; opacity: 1">
-    </a-image>
+            <img id="infobutton1"
+                src="./public/assets/images/infobutton1.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton2"
+                src="./public/assets/images/infobutton2.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton3"
+                src="./public/assets/images/infobutton3.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton4"
+                src="./public/assets/images/infobutton4.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-    <a-entity id="imageContainer" position="0 0 -1.2">
+            <img id="flyingEffect"
+                src="./public/assets/images/flyingeffect.png"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+
+            <audio id="infoSound1"
+                src="./public/assets/audio/info1.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound2"
+                src="./public/assets/audio/info2.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound3"
+                src="./public/assets/audio/info3.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound4"
+                src="./public/assets/audio/info4.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls="smoothingThreshold: 0.2;"></a-camera>
+
+        <a-entity id="imageContainer" position="0 0 -1.2">
+            <a-image
+                id="baseImage"
+                src="#img1"
+                width="2"        height="1.25"        material="shader: flat; npot: true; transparent: true">
+            </a-image>
+
+            <a-entity position="0 0 0">
+                <a-image
+                    id="infobutton1"
+                    src="#infobutton1"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
+                    data-infopanel="infoPanel1" data-infosound="infoSound1"
+                    info-button-listener>
+                </a-image>
+                <a-image
+                    id="infoPanel1"
+                    src="#infoSvg1"
+                    visible="false"
+                    position="-0.6 0.01 0.01" width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                </a-image>
+            </a-entity>
+
+            <a-entity position="0 0 0">
+                <a-image
+                    id="infobutton2"
+                    src="#infobutton2"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
+                    data-infopanel="infoPanel2" data-infosound="infoSound2"
+                    info-button-listener>
+                </a-image>
+                <a-image
+                    id="infoPanel2"
+                    src="#infoSvg2"
+                    visible="false"
+                    position="-0.5 -0.5 0.01"    width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                </a-image>
+            </a-entity>
+
+            <a-entity position="0 0 0">
+                <a-image
+                    id="infobutton3"
+                    src="#infobutton3"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
+                    data-infopanel="infoPanel3" data-infosound="infoSound3"
+                    info-button-listener>
+                </a-image>
+                <a-image
+                    id="infoPanel3"
+                    src="#infoSvg3"
+                    visible="false"
+                    position="0.5 -0.2 0.02"    width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                </a-image>
+            </a-entity>
+
+            <a-entity position="0 0 0">
+                <a-image
+                    id="infobutton4"
+                    src="#infobutton4"
+                    width="0.1"        height="0.1"        class="clickable"
+                    position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
+                    data-infopanel="infoPanel4" data-infosound="infoSound4"
+                    info-button-listener>
+                </a-image>
+                <a-image
+                    id="infoPanel4"
+                    src="#infoSvg4"
+                    visible="false"
+                    position="0.3 -0.2 0.02"   width="0.4"    height="0.5"        material="shader: flat; npot: true; transparent: true">
+                </a-image>
+            </a-entity>
         </a-entity>
 
-    <a-entity id="flyingEffects">
+        <a-entity id="flyingEffects">
+            <a-image
+                id="flyingEffectTemplate"
+                src="#flyingEffect"
+                width="0.075"
+                height="0.075"
+                material="transparent: true; opacity: 0.8; shader: flat; npot: true"
+                random-fly=""
+                visible="false">
+            </a-image>
         </a-entity>
 
-    </a-scene>
+        </a-scene>
 
     <script>
         // Modify the flying effect creation for AR
