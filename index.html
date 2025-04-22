@@ -133,19 +133,68 @@
         arjs="detectionMode: mono_and_matrix; debugUIEnabled: true; sourceType: webcam; patternRatio: 0.5">
 
         <a-assets timeout="10000">
-            </a-assets>
+            <img id="img1"
+                src="./public/assets/images/img1.png"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-        <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls="smoothingThreshold: 0.2;"></a-camera>
+            <img id="infoSvg1"
+                src="https://via.placeholder.com/150"
+                crossorigin="anonymous"
+                onerror="console.error('Error loading image:', this.src, 'Status:', this.status);">
 
-        <a-box position="0 0 -1" color="red"></a-box>
+            <img id="infoSvg2"
+                src="./public/assets/images/info2.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg3"
+                src="./public/assets/images/info3.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg4"
+                src="./public/assets/images/info4.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-        <a-entity id="imageContainer" position="0 0 -1.2">
-            </a-entity>
+            <img id="infobutton1"
+                src="./public/assets/images/infobutton1.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton2"
+                src="./public/assets/images/infobutton2.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton3"
+                src="./public/assets/images/infobutton3.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton4"
+                src="./public/assets/images/infobutton4.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-        <a-entity id="flyingEffects">
-            </a-entity>
+            <img id="flyingEffect"
+                src="./public/assets/images/flyingeffect.png"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-        </a-scene>
+            <audio id="infoSound1"
+                src="./public/assets/audio/info1.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound2"
+                src="./public/assets/audio/info2.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound3"
+                src="./public/assets/audio/info3.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound4"
+                src="./public/assets/audio/info4.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+        </a-assets>
 
         <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls="smoothingThreshold: 0.2;"></a-camera>
 
