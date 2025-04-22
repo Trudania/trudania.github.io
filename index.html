@@ -138,10 +138,11 @@
                 crossorigin="anonymous"
                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
 
-             <img id="infoSvg1"
+            <img id="infoSvg1"
                 src="./public/assets/images/info1.png"
                 crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+                onerror="console.error('Error loading image:', this.src, 'Status:', this.status);">
+                
             <img id="infoSvg2"
                 src="./public/assets/images/info2.svg"
                 crossorigin="anonymous"
