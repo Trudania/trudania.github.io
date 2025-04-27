@@ -36,43 +36,35 @@
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script>
-        function showInfoPanel(infoId, soundId) {
-            console.log('showInfoPanel called with:', infoId, soundId); // DEBUGGING LINE
+        function showInfoPanel(infoId) {
+            console.log('showInfoPanel called with:', infoId); // DEBUGGING LINE
 
-            // Hide all panels and stop all sounds
+            // Hide all panels
             for (let i = 1; i <= 4; i++) {
                 const panel = document.querySelector(`#infoPanel${i}`);
-                const sound = document.querySelector(`#infoSound${i}`);
                 if (panel) panel.setAttribute('visible', false);
-                if (sound) {
-                    sound.pause();
-                    sound.currentTime = 0;
-                }
             }
 
-            // Show selected panel and play selected sound
+            // Show selected panel
             const selectedPanel = document.querySelector(`#${infoId}`);
-            const selectedSound = document.querySelector(`#${soundId}`);
             if (selectedPanel) selectedPanel.setAttribute('visible', true);
-            if (selectedSound) selectedSound.play();
         }
 
         AFRAME.registerComponent('info-button-listener', {
             init: function () {
                 const buttonNumber = this.el.id.slice(-1); // Get the number from the button ID
                 const infoPanelId = `infoPanel${buttonNumber}`;
-                const infoSoundId = `infoSound${buttonNumber}`;
                 const self = this;
 
+                // Add both click and touchstart listeners for broader device compatibility
                 this.el.addEventListener('click', function () {
                     console.log('Button', buttonNumber, 'clicked'); // Debugging
-                    showInfoPanel(infoPanelId, infoSoundId);
+                    showInfoPanel(infoPanelId);
                 });
 
-                // Add touch event listener for mobile
                 this.el.addEventListener('touchstart', function () {
                     console.log('Button', buttonNumber, 'touched'); // Debugging for touch
-                    showInfoPanel(infoPanelId, infoSoundId);
+                    showInfoPanel(infoPanelId);
                 });
             }
         });
@@ -216,7 +208,7 @@
                     src="#infobutton1"
                     width="0.3"        height="0.1"
                     position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel1" data-infosound="infoSound1"
+                    data-infopanel="infoPanel1"
                     info-button-listener>
                 </a-image>
                 <a-image
@@ -233,7 +225,7 @@
                     src="#infobutton2"
                     width="0.3"        height="0.1"
                     position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel2" data-infosound="infoSound2"
+                    data-infopanel="infoPanel2"
                     info-button-listener>
                 </a-image>
                 <a-image
@@ -250,7 +242,7 @@
                     src="#infobutton3"
                     width="0.3"        height="0.1"
                     position="1 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel3" data-infosound="infoSound3"
+                    data-infopanel="infoPanel3"
                     info-button-listener>
                 </a-image>
                 <a-image
@@ -267,7 +259,7 @@
                     src="#infobutton4"
                     width="0.3"        height="0.1"
                     position="0.4 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel4" data-infosound="infoSound4"
+                    data-infopanel="infoPanel4"
                     info-button-listener>
                 </a-image>
                 <a-image
