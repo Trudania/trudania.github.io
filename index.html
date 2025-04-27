@@ -5,11 +5,16 @@
     <title>AR Info Panel</title>
     <script>
         // Prevent popup.js error
-        window.myObject = {
-            create: function() {
-                return true;
-            }
-        };
+        // The key is to ensure window.myObject exists *before* popup.js runs.
+        if (typeof window.myObject === 'undefined') {
+            window.myObject = {
+                create: function() {
+                    console.warn("myObject.create() called, but popup.js may not be loaded.");
+                    return true; // Or return a suitable default value
+                }
+            };
+        }
+
 
         // Suppress WebGL warnings
         const originalConsoleWarn = console.warn;
@@ -37,7 +42,7 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script>
         function showInfoPanel(infoId) {
-            console.log('showInfoPanel called with:', infoId); // DEBUGGING LINE
+            console.log('showInfoPanel called with:', infoId);
 
             // Hide all panels
             for (let i = 1; i <= 4; i++) {
@@ -52,24 +57,22 @@
 
         AFRAME.registerComponent('info-button-listener', {
             init: function () {
-                const buttonNumber = this.el.id.slice(-1); // Get the number from the button ID
+                const buttonNumber = this.el.id.slice(-1);
                 const infoPanelId = `infoPanel${buttonNumber}`;
                 const self = this;
 
-                // Add both click and touchstart listeners for broader device compatibility
                 this.el.addEventListener('click', function () {
-                    console.log('Button', buttonNumber, 'clicked'); // Debugging
+                    console.log('Button', buttonNumber, 'clicked');
                     showInfoPanel(infoPanelId);
                 });
 
                 this.el.addEventListener('touchstart', function () {
-                    console.log('Button', buttonNumber, 'touched'); // Debugging for touch
+                    console.log('Button', buttonNumber, 'touched');
                     showInfoPanel(infoPanelId);
                 });
             }
         });
 
-        // Register random fly animation
         AFRAME.registerComponent('random-fly', {
             schema: {
                 speed: { type: 'number', default: 3000 }
@@ -100,7 +103,6 @@
             }
         });
 
-        // Create multiple flying effects when scene loads
         document.addEventListener('DOMContentLoaded', () => {
             const scene = document.querySelector('a-scene');
             const flyingEffectsContainer = document.querySelector('#flyingEffects');
@@ -112,9 +114,9 @@
                     fx.setAttribute('id', `flyingEffect${i}`);
                     fx.setAttribute('visible', true);
 
-                    const x = (Math.random() - 0.5) * 2;    // Adjust range for AR
-                    const y = 0.1 + Math.random() * 1;      // Adjust range for AR
-                    const z = -0.8 + Math.random() * 0.2;    // Adjust Z position for AR
+                    const x = (Math.random() - 0.5) * 2;
+                    const y = 0.1 + Math.random() * 1;
+                    const z = -0.8 + Math.random() * 0.2;
 
                     fx.setAttribute('position', `${x} ${y} ${z}`);
                     flyingEffectsContainer.appendChild(fx);
@@ -281,9 +283,9 @@
                     fx.setAttribute('id', `flyingEffect${i}`);
                     fx.setAttribute('visible', true);
 
-                    const x = (Math.random() - 0.5) * 2;    // Adjust range for AR
-                    const y = 0.1 + Math.random() * 1;      // Adjust range for AR
-                    const z = -0.8 + Math.random() * 0.2;    // Adjust Z position for AR
+                    const x = (Math.random() - 0.5) * 2;
+                    const y = 0.1 + Math.random() * 1;
+                    const z = -0.8 + Math.random() * 0.2;
 
                     fx.setAttribute('position', `${x} ${y} ${z}`);
                     flyingEffectsContainer.appendChild(fx);
