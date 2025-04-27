@@ -68,6 +68,12 @@
                     console.log('Button', buttonNumber, 'clicked'); // Debugging
                     showInfoPanel(infoPanelId, infoSoundId);
                 });
+
+                // Add touch event listener for mobile
+                this.el.addEventListener('touchstart', function () {
+                    console.log('Button', buttonNumber, 'touched'); // Debugging for touch
+                    showInfoPanel(infoPanelId, infoSoundId);
+                });
             }
         });
 
@@ -211,12 +217,12 @@
                     width="0.3"        height="0.1"
                     position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
                     data-infopanel="infoPanel1" data-infosound="infoSound1"
-                    >
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel1"
                     src="#infoSvg1"
-                    visible="true"
+                    visible="false"
                     position="-0.6 -0.2 0.02" width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
                 </a-image>
             </a-entity>
@@ -228,12 +234,12 @@
                     width="0.3"        height="0.1"
                     position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
                     data-infopanel="infoPanel2" data-infosound="infoSound2"
-                    >
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel2"
                     src="#infoSvg2"
-                    visible="true"
+                    visible="false"
                     position="-0.4 -0.41 0.02"    width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
                 </a-image>
             </a-entity>
@@ -245,12 +251,12 @@
                     width="0.3"        height="0.1"
                     position="1 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
                     data-infopanel="infoPanel3" data-infosound="infoSound3"
-                    >
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel3"
                     src="#infoSvg3"
-                    visible="true"
+                    visible="false"
                     position="1 -0.2 0.02"    width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
                 </a-image>
             </a-entity>
@@ -262,12 +268,12 @@
                     width="0.3"        height="0.1"
                     position="0.4 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
                     data-infopanel="infoPanel4" data-infosound="infoSound4"
-                    >
+                    info-button-listener>
                 </a-image>
                 <a-image
                     id="infoPanel4"
                     src="#infoSvg4"
-                    visible="true"
+                    visible="false"
                     position="0.4 -0.2 0.02"   width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
                 </a-image>
             </a-entity>
