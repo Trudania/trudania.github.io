@@ -4,16 +4,18 @@
     <meta charset="UTF-8" />
     <title>AR Info Panel</title>
     <script>
-        // Prevent popup.js error
-        // The key is to ensure window.myObject exists *before* popup.js runs.
-        if (typeof window.myObject === 'undefined') {
-            window.myObject = {
-                create: function() {
-                    console.warn("myObject.create() called, but popup.js may not be loaded.");
-                    return true; // Or return a suitable default value
-                }
-            };
-        }
+        // **MOST ROBUST FIX for popup.js error:**
+        // Use an immediately invoked function expression (IIFE) to ensure this code runs FIRST.
+        (function() {
+            if (typeof window.myObject === 'undefined') {
+                window.myObject = {
+                    create: function() {
+                        console.warn("myObject.create() called, but popup.js may not be loaded.");
+                        return true; // Or return a suitable default value
+                    }
+                };
+            }
+        })();
 
         // Suppress WebGL warnings
         const originalConsoleWarn = console.warn;
