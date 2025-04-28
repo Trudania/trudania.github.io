@@ -33,6 +33,7 @@ body {
   top: 0 !important;
   left: 0 !important;
   z-index: 1 !important;
+  cursor: crosshair !important;
 }
 
 /* Hide VR button */
@@ -51,6 +52,12 @@ body {
 /* Clickable elements */
 .clickable {
   cursor: pointer;
+  pointer-events: auto !important;
+}
+
+/* Highlight clickable elements on hover/touch for better UX */
+.a-canvas .clickable:hover {
+  filter: brightness(1.2);
 }
 
 /* Info panels */
@@ -59,6 +66,12 @@ body {
   padding: 1em;
   border-radius: 4px;
   color: white;
+}
+
+/* Make info panels more readable */
+[id^="infoPanel"] {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
 /* Button styles (if needed) */
@@ -138,4 +151,28 @@ button:focus-visible {
 .loading-text {
   color: white;
   font-size: 1.2em;
+}
+
+/* Button click feedback - not just visual, also for debuggability */
+a-image.clickable {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Additional touchscreen support */
+@media (hover: none) {
+  .clickable {
+    pointer-events: auto !important;
+  }
 }

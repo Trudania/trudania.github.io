@@ -71,46 +71,47 @@ AFRAME.registerComponent('info-button-listener', {
         }
 
         // Use the button image within the entity as the click target
-        const buttonImage = el.querySelector('a-image[id^="infobutton"]');
+        const buttonImage = el.querySelector('a-image.clickable');
         if (!buttonImage) {
-            console.error(`Button image not found within ${el.id}`);
+            console.error(`Clickable button image not found within ${el.id}`);
             return;
         }
 
         buttonImage.addEventListener('click', () => {
-            console.log(`Info button image in ${el.id} clicked`); // Debugging
+            console.log(`Button ${el.id} clicked`); // Debugging
             this.showInfo(panelEl, soundEl);
+        });
+        
+        // Also add mouseenter/mouseleave feedback for better UX
+        buttonImage.addEventListener('mouseenter', () => {
+            buttonImage.setAttribute('scale', '1.1 1.1 1.1');
+        });
+        
+        buttonImage.addEventListener('mouseleave', () => {
+            buttonImage.setAttribute('scale', '1 1 1');
         });
     },
     showInfo: function (panelEl, soundEl) {
-        console.log(`showInfo called with panelEl:`, panelEl, `and soundEl:`, soundEl); // Debugging
+        console.log(`Showing info panel: ${panelEl.id}`); // Debugging
+        
         // Hide all panels and stop all sounds
         const infoPanels = document.querySelectorAll('[id^="infoPanel"]');
         const infoSounds = document.querySelectorAll('[id^="infoSound"]');
 
-        infoPanels.forEach(p => {
-            // Check if the element is an A-Frame entity before setting attributes
-            if (p.setAttribute) {
-                p.setAttribute('visible', false);
-                p.setAttribute('material', 'opacity', 0);
-                console.log(`Hiding panel: ${p.id}`); // Debugging
-            }
+        infoPanels.forEach(panel => {
+            panel.setAttribute('visible', false);
         });
-        infoSounds.forEach(s => {
-            // Check if the element is an HTMLAudioElement before controlling playback
-            if (s.pause && s.currentTime !== undefined) {
-                 s.pause();
-                 s.currentTime = 0;
-                 console.log(`Stopping sound: ${s.id}`); // Debugging
+        
+        infoSounds.forEach(sound => {
+            if (sound.pause) {
+                sound.pause();
+                sound.currentTime = 0;
             }
         });
 
         // Show the selected panel and play the sound
         panelEl.setAttribute('visible', true);
-        panelEl.setAttribute('material', 'opacity', 1);
-        console.log(`Showing panel: ${panelEl.id}`); // Debugging
-        soundEl.play().catch(e => console.error("Error playing sound:", e)); // Add error handling for play()
-        console.log(`Playing sound: ${soundEl.id}`); // Debugging
+        soundEl.play().catch(e => console.error("Error playing sound:", e));
     }
 });
 
