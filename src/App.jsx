@@ -1,76 +1,274 @@
-import 'aframe';
-import React, { useEffect } from 'react';
-import { Box, Sphere, Cylinder, Plane, Sky, Text, Scene } from 'react-aframe-ar';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>AR Info Panel</title>
+    <script>
+        // Suppress WebGL warnings
+        const originalConsoleWarn = console.warn;
+        const originalConsoleError = console.error;
 
-// Initialize A-Frame components
-if (!AFRAME.components['ar-handler']) {
-  AFRAME.registerComponent('ar-handler', {
-    init: function() {
-      console.log('AR component initialized');
-    }
-  });
-}
+        console.warn = function() {
+            if (arguments[0] && (
+                arguments[0].includes('WebGL') ||
+                arguments[0].includes('GL_INVALID') ||
+                arguments[0].includes('texSubImage2D')
+            )) {
+                return;
+            }
+            originalConsoleWarn.apply(console, arguments);
+        };
 
-function App() {
-  useEffect(() => {
-    // Component initialization and cleanup
-    const cleanup = () => {
-      // Cleanup code if needed
-    };
-    return cleanup;
-  }, []);
-
-  return (
-    <>
-      <Scene
-        embedded
-        arjs="sourceType: webcam; debugUIEnabled: false;"
-        renderer="antialias: true; alpha: true"
+        console.error = function() {
+            if (arguments[0] && arguments[0].includes('popup.js')) {
+                return;
+            }
+            originalConsoleError.apply(console, arguments);
+        };
+    </script>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+      .info-panel {
+        display: none;
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border: 1px solid #ccc;
+        top: 50px;
+        left: 50px;
+        z-index: 1000;
+      }
+      .info-panel.visible {
+        display: block;
+      }
+    </style>
+</head>
+<body>
+    <a-scene
+        renderer="antialias: true; colorManagement: true;"
+        loading-screen="enabled: true"
         vr-mode-ui="enabled: false"
-      >
-        <Box 
-          position="-1 0.5 -3" 
-          rotation="0 45 0" 
-          color="#4CC3D9" 
-          shadow 
-          material="shader: standard"
-        />
-        <Sphere 
-          position="0 1.25 -5" 
-          radius="1.25" 
-          color="#EF2D5E" 
-          shadow 
-          material="shader: standard"
-        />
-        <Cylinder 
-          position="1 0.75 -3" 
-          radius="0.5" 
-          height="1.5" 
-          color="#FFC65D" 
-          shadow 
-          material="shader: standard"
-        />
-        <Plane 
-          position="0 0 -4" 
-          rotation="-90 0 0" 
-          width="4" 
-          height="4" 
-          color="#7BC8A4" 
-          shadow 
-          material="shader: standard"
-        />
-        <Sky color="#ECECEC" />
-        <Text 
-          value="Hello world, react-aframe-ar!" 
-          align="center" 
-          position="0 2.3 -1.5" 
-          color="#7BC8A4"
-          width="6"
-        />
-        <a-entity camera look-controls wasd-controls></a-entity>
-      </Scene>
-    </>
-  );
-}
+        arjs="detectionMode: mono_and_matrix; debugUIEnabled: true; sourceType: webcam; patternRatio: 0.5">
 
-export default App;
+        <a-assets timeout="10000">
+            <img id="img1"
+                src="./public/assets/images/img1.png"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+
+            <img id="infoSvg1"
+                src="./public/assets/images/info1.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg2"
+                src="./public/assets/images/info2.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg3"
+                src="./public/assets/images/info3.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg4"
+                src="./public/assets/images/info4.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+
+            <img id="infobutton1"
+                src="./public/assets/images/infobutton1.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton2"
+                src="./public/assets/images/infobutton2.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton3"
+                src="./public/assets/images/infobutton3.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton4"
+                src="./public/assets/images/infobutton4.svg"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+
+            <img id="flyingEffect"
+                src="./public/assets/images/flyingeffect.png"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+
+            <audio id="infoSound1"
+                src="./public/assets/audio/info1.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound2"
+                src="./public/assets/audio/info2.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound3"
+                src="./public/assets/audio/info3.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+            <audio id="infoSound4"
+                src="./public/assets/audio/info4.mp3"
+                preload="auto"
+                onerror="this.onerror=null; console.log('Error loading audio:', this.src);"></audio>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls></a-camera>
+
+        <a-entity id="imageContainer" position="0 0 -1.2">
+            <a-image
+                id="baseImage"
+                src="#img1"
+                width="2" height="1.25"
+                material="shader: flat; npot: true; transparent: true">
+            </a-image>
+
+            <a-entity id="infoButton1" data-infopanel="infoPanel1" data-infosound="infoSound1" class="info-button">
+                <a-image src="#infobutton1" width="0.1" height="0.1" class="clickable"
+                         position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true">
+                </a-image>
+                <a-image id="infoPanel1" src="#infoSvg1" visible="false" position="-0.6 0.01 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
+                </a-image>
+            </a-entity>
+
+            <a-entity id="infoButton2" data-infopanel="infoPanel2" data-infosound="infoSound2" class="info-button">
+                <a-image src="#infobutton2" width="0.1" height="0.1" class="clickable"
+                         position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true">
+                </a-image>
+                <a-image id="infoPanel2" src="#infoSvg2" visible="false" position="-0.4 -0.2 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
+                </a-image>
+            </a-entity>
+
+            <a-entity id="infoButton3" data-infopanel="infoPanel3" data-infosound="infoSound3" class="info-button">
+                <a-image src="#infobutton3" width="0.1" height="0.1" class="clickable"
+                         position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true">
+                </a-image>
+                <a-image id="infoPanel3" src="#infoSvg3" visible="false" position="0.6 0.0141 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
+                </a-image>
+            </a-entity>
+
+            <a-entity id="infoButton4" data-infopanel="infoPanel4" data-infosound="infoSound4" class="info-button">
+                <a-image src="#infobutton4" width="0.1" height="0.1" class="clickable"
+                         position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true">
+                </a-image>
+                <a-image id="infoPanel4" src="#infoSvg4" visible="false" position="0.2 0.0141 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
+                </a-image>
+            </a-entity>
+        </a-entity>
+
+        <a-entity id="flyingEffects">
+            <a-image
+                id="flyingEffectTemplate"
+                src="#flyingEffect"
+                width="0.075"
+                height="0.075"
+                material="transparent: true; opacity: 0.8; shader: flat; npot: true"
+                random-fly=""
+                visible="false">
+            </a-image>
+        </a-entity>
+
+    </a-scene>
+
+    <script>
+        AFRAME.registerComponent('info-button-listener', {
+            init: function () {
+                const el = this.el;
+                const panelId = el.getAttribute('data-infopanel');
+                const soundId = el.getAttribute('data-infosound');
+                const panelEl = document.getElementById(panelId);
+                const soundEl = document.getElementById(soundId);
+
+                // Ensure elements exist
+                if (!panelEl) {
+                    console.error(`Info panel with ID ${panelId} not found!`);
+                    return;
+                }
+                if (!soundEl) {
+                    console.error(`Info sound with ID ${soundId} not found!`);
+                    return;
+                }
+
+                el.addEventListener('click', () => {
+                    this.showInfo(panelEl, soundEl);
+                });
+            },
+            showInfo: function (panelEl, soundEl) {
+                // Hide all panels and stop all sounds
+                const infoPanels = document.querySelectorAll('[id^="infoPanel"]');
+                const infoSounds = document.querySelectorAll('[id^="infoSound"]');
+
+                infoPanels.forEach(p => {
+                    p.setAttribute('visible', false);
+                    p.setAttribute('material', 'opacity: 0');
+                });
+                infoSounds.forEach(s => {
+                    s.pause();
+                    s.currentTime = 0;
+                });
+
+                // Show the selected panel and play the sound
+                panelEl.setAttribute('visible', true);
+                panelEl.setAttribute('material', 'opacity: 1');
+                soundEl.play();
+            }
+        });
+
+        AFRAME.registerComponent('random-fly', {
+            schema: {
+                speed: { type: 'number', default: 3000 }
+            },
+            init: function () {
+                this.startRandomAnimation();
+            },
+            startRandomAnimation: function () {
+                const el = this.el;
+                const speed = this.data.speed;
+
+                function setRandomPosition() {
+                    const x = (Math.random() - 0.5) * 2;
+                    const y = 0.1 + Math.random() * 1;
+                    const z = -0.8 + Math.random() * 0.2;
+
+                    el.setAttribute('animation__move', {
+                        property: 'position',
+                        to: `${x} ${y} ${z}`,
+                        dur: speed,
+                        easing: 'easeInOutSine',
+                        loop: false
+                    });
+                }
+
+                setInterval(setRandomPosition, speed);
+                setRandomPosition();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const scene = document.querySelector('a-scene');
+            const flyingEffectsContainer = document.querySelector('#flyingEffects');
+            const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
+
+            scene.addEventListener('loaded', () => {
+                for (let i = 0; i < 20; i++) {
+                    const fx = flyingEffectTemplate.cloneNode(true);
+                    fx.setAttribute('id', `flyingEffect${i}`);
+                    fx.setAttribute('visible', true);
+
+                    const x = (Math.random() - 0.5) * 2;
+                    const y = 0.1 + Math.random() * 1;
+                    const z = -0.8 + Math.random() * 0.2;
+
+                    fx.setAttribute('position', `${x} ${y} ${z}`);
+                    flyingEffectsContainer.appendChild(fx);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
