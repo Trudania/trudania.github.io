@@ -51,6 +51,69 @@ AFRAME.registerComponent('handle-img-load', {
   }
 });
 
+// Register the info-button-listener component
+AFRAME.registerComponent('info-button-listener', {
+    init: function () {
+        const el = this.el;
+        const panelId = el.getAttribute('data-infopanel');
+        const soundId = el.getAttribute('data-infosound');
+        const panelEl = document.getElementById(panelId);
+        const soundEl = document.getElementById(soundId);
+
+        // Ensure elements exist
+        if (!panelEl) {
+            console.error(`Info panel with ID ${panelId} not found!`);
+            return;
+        }
+        if (!soundEl) {
+            console.error(`Info sound with ID ${soundId} not found!`);
+            return;
+        }
+
+        // Use the button image within the entity as the click target
+        const buttonImage = el.querySelector('a-image[id^="infobutton"]');
+        if (!buttonImage) {
+            console.error(`Button image not found within ${el.id}`);
+            return;
+        }
+
+        buttonImage.addEventListener('click', () => {
+            console.log(`Info button image in ${el.id} clicked`); // Debugging
+            this.showInfo(panelEl, soundEl);
+        });
+    },
+    showInfo: function (panelEl, soundEl) {
+        console.log(`showInfo called with panelEl:`, panelEl, `and soundEl:`, soundEl); // Debugging
+        // Hide all panels and stop all sounds
+        const infoPanels = document.querySelectorAll('[id^="infoPanel"]');
+        const infoSounds = document.querySelectorAll('[id^="infoSound"]');
+
+        infoPanels.forEach(p => {
+            // Check if the element is an A-Frame entity before setting attributes
+            if (p.setAttribute) {
+                p.setAttribute('visible', false);
+                p.setAttribute('material', 'opacity', 0);
+                console.log(`Hiding panel: ${p.id}`); // Debugging
+            }
+        });
+        infoSounds.forEach(s => {
+            // Check if the element is an HTMLAudioElement before controlling playback
+            if (s.pause && s.currentTime !== undefined) {
+                 s.pause();
+                 s.currentTime = 0;
+                 console.log(`Stopping sound: ${s.id}`); // Debugging
+            }
+        });
+
+        // Show the selected panel and play the sound
+        panelEl.setAttribute('visible', true);
+        panelEl.setAttribute('material', 'opacity', 1);
+        console.log(`Showing panel: ${panelEl.id}`); // Debugging
+        soundEl.play().catch(e => console.error("Error playing sound:", e)); // Add error handling for play()
+        console.log(`Playing sound: ${soundEl.id}`); // Debugging
+    }
+});
+
 // Create root and render app
 createRoot(document.getElementById('root')).render(
   <StrictMode>
