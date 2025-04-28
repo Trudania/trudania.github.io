@@ -42,6 +42,10 @@
       .info-panel.visible {
         display: block;
       }
+      .clickable {
+        cursor: pointer; /* Add a cursor to indicate interactivity */
+        z-index: 1001; /* Increased z-index for buttons */
+      }
     </style>
 </head>
 <body>
@@ -124,8 +128,8 @@
                 material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity id="infoButton1" data-infopanel="infoPanel1" data-infosound="infoSound1" class="info-button">
-                <a-image src="#infobutton1" width="0.1" height="0.1" class="clickable"
+            <a-entity id="infoButton1" data-infopanel="infoPanel1" data-infosound="infoSound1" class="info-button clickable">
+                <a-image id="infobutton1-image" src="#infobutton1" width="0.1" height="0.1"
                          position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true">
                 </a-image>
                 <a-image id="infoPanel1" src="#infoSvg1" visible="false" position="-0.6 0.01 0.01"
@@ -133,8 +137,8 @@
                 </a-image>
             </a-entity>
 
-            <a-entity id="infoButton2" data-infopanel="infoPanel2" data-infosound="infoSound2" class="info-button">
-                <a-image src="#infobutton2" width="0.1" height="0.1" class="clickable"
+            <a-entity id="infoButton2" data-infopanel="infoPanel2" data-infosound="infoSound2" class="info-button clickable">
+                <a-image  id="infobutton2-image"  src="#infobutton2" width="0.1" height="0.1"
                          position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true">
                 </a-image>
                 <a-image id="infoPanel2" src="#infoSvg2" visible="false" position="-0.4 -0.2 0.01"
@@ -142,8 +146,8 @@
                 </a-image>
             </a-entity>
 
-            <a-entity id="infoButton3" data-infopanel="infoPanel3" data-infosound="infoSound3" class="info-button">
-                <a-image src="#infobutton3" width="0.1" height="0.1" class="clickable"
+            <a-entity id="infoButton3" data-infopanel="infoPanel3" data-infosound="infoSound3" class="info-button clickable">
+                <a-image id="infobutton3-image"  src="#infobutton3" width="0.1" height="0.1"
                          position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true">
                 </a-image>
                 <a-image id="infoPanel3" src="#infoSvg3" visible="false" position="0.6 0.0141 0.01"
@@ -151,8 +155,8 @@
                 </a-image>
             </a-entity>
 
-            <a-entity id="infoButton4" data-infopanel="infoPanel4" data-infosound="infoSound4" class="info-button">
-                <a-image src="#infobutton4" width="0.1" height="0.1" class="clickable"
+            <a-entity id="infoButton4" data-infopanel="infoPanel4" data-infosound="infoSound4" class="info-button clickable">
+                <a-image id="infobutton4-image"  src="#infobutton4" width="0.1" height="0.1"
                          position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true">
                 </a-image>
                 <a-image id="infoPanel4" src="#infoSvg4" visible="false" position="0.2 0.0141 0.01"
@@ -195,10 +199,12 @@
                 }
 
                 el.addEventListener('click', () => {
+                    console.log(`Info button ${el.id} clicked`); // Debugging
                     this.showInfo(panelEl, soundEl);
                 });
             },
             showInfo: function (panelEl, soundEl) {
+                console.log(`showInfo called with panelEl:`, panelEl, `and soundEl:`, soundEl); // Debugging
                 // Hide all panels and stop all sounds
                 const infoPanels = document.querySelectorAll('[id^="infoPanel"]');
                 const infoSounds = document.querySelectorAll('[id^="infoSound"]');
@@ -206,16 +212,20 @@
                 infoPanels.forEach(p => {
                     p.setAttribute('visible', false);
                     p.setAttribute('material', 'opacity: 0');
+                    console.log(`Hiding panel: ${p.id}`); // Debugging
                 });
                 infoSounds.forEach(s => {
                     s.pause();
                     s.currentTime = 0;
+                    console.log(`Stopping sound: ${s.id}`); // Debugging
                 });
 
                 // Show the selected panel and play the sound
                 panelEl.setAttribute('visible', true);
                 panelEl.setAttribute('material', 'opacity: 1');
+                console.log(`Showing panel: ${panelEl.id}`); // Debugging
                 soundEl.play();
+                console.log(`Playing sound: ${soundEl.id}`); // Debugging
             }
         });
 
