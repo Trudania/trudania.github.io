@@ -4,13 +4,6 @@
     <meta charset="UTF-8" />
     <title>AR Info Panel</title>
     <script>
-        // Prevent popup.js error
-        window.myObject = {
-            create: function() {
-                return true;
-            }
-        };
-
         // Suppress WebGL warnings
         const originalConsoleWarn = console.warn;
         const originalConsoleError = console.error;
@@ -32,75 +25,24 @@
             }
             originalConsoleError.apply(console, arguments);
         };
-
-        function showInfoPanel(infoId, soundId) {
-            console.log('showInfoPanel called with:', infoId, soundId); // DEBUGGING LINE
-
-            // Hide all panels and stop all sounds
-            for (let i = 1; i <= 4; i++) {
-                const panel = document.querySelector(`#infoPanel${i}`);
-                const sound = document.querySelector(`#infoSound${i}`);
-                if (panel) {
-                    panel.setAttribute('visible', false);
-                    panel.setAttribute('material', 'opacity: 0'); // Reset opacity
-                }
-                if (sound) {
-                    sound.pause();
-                    sound.currentTime = 0;
-                }
-            }
-
-            // Show selected panel and play selected sound by setting opacity
-            const selectedPanel = document.querySelector(`#${infoId}`);
-            console.log('Selected Panel Element in showInfoPanel:', selectedPanel); // DEBUGGING LINE
-            const selectedSound = document.querySelector(`#${soundId}`);
-            if (selectedPanel) {
-                selectedPanel.setAttribute('visible', true); // Ensure it's visible
-                selectedPanel.setAttribute('material', 'opacity: 1'); // Set opacity to 1
-            }
-            if (selectedSound) selectedSound.play();
-        }
-
-        AFRAME.registerComponent('info-button-listener', {
-            init: function () {
-                const buttonNumber = this.el.id.slice(-1); // Get the number from the button ID
-                const infoPanelId = `infoPanel${buttonNumber}`;
-                const infoSoundId = `infoSound${buttonNumber}`;
-                const self = this;
-
-                console.log('Info Button Listener Initialized for button:', buttonNumber, 'panel ID:', infoPanelId, 'sound ID:', infoSoundId); // DEBUGGING
-
-                this.el.addEventListener('click', function () {
-                    console.log('Button', buttonNumber, 'CLICKED!'); // CONFIRMING CLICK
-                    showInfoPanel(infoPanelId, infoSoundId);
-                });
-            }
-        });
     </script>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = document.querySelector('a-scene');
-            const flyingEffectsContainer = document.querySelector('#flyingEffects');
-            const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
-
-            scene.addEventListener('loaded', () => {
-                for (let i = 0; i < 20; i++) {
-                    const fx = flyingEffectTemplate.cloneNode(true);
-                    fx.setAttribute('id', `flyingEffect${i}`);
-                    fx.setAttribute('visible', true);
-
-                    const x = (Math.random() - 0.5) * 2;    // Adjust range for AR
-                    const y = 0.1 + Math.random() * 1;      // Adjust range for AR
-                    const z = -0.8 + Math.random() * 0.2;    // Adjust Z position for AR
-
-                    fx.setAttribute('position', `${x} ${y} ${z}`);
-                    flyingEffectsContainer.appendChild(fx);
-                }
-            });
-        });
-    </script>
+    <style>
+      .info-panel {
+        display: none;
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border: 1px solid #ccc;
+        top: 50px;
+        left: 50px;
+        z-index: 1000;
+      }
+      .info-panel.visible {
+        display: block;
+      }
+    </style>
 </head>
 <body>
     <a-scene
@@ -178,74 +120,43 @@
             <a-image
                 id="baseImage"
                 src="#img1"
-                width="2"        height="1.25"        material="shader: flat; npot: true; transparent: true">
+                width="2" height="1.25"
+                material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton1"
-                    src="#infobutton1"
-                    width="0.1"        height="0.1"        class="clickable"
-                    position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+            <a-entity id="infoButton1" data-infopanel="infoPanel1" data-infosound="infoSound1" class="info-button">
+                <a-image src="#infobutton1" width="0.1" height="0.1" class="clickable"
+                         position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel1"
-                    src="#infoSvg1"
-                    visible="true"
-                    position="-0.6 0.01 0.01" width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                <a-image id="infoPanel1" src="#infoSvg1" visible="false" position="-0.6 0.01 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton2"
-                    src="#infobutton2"
-                    width="0.1"        height="0.1"        class="clickable"
-                    position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+            <a-entity id="infoButton2" data-infopanel="infoPanel2" data-infosound="infoSound2" class="info-button">
+                <a-image src="#infobutton2" width="0.1" height="0.1" class="clickable"
+                         position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel2"
-                    src="#infoSvg2"
-                    visible="true"
-                    position="-0.4 -0.2 0.01"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                <a-image id="infoPanel2" src="#infoSvg2" visible="false" position="-0.4 -0.2 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton3"
-                    src="#infobutton3"
-                    width="0.1"        height="0.1"        class="clickable"
-                    position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+            <a-entity id="infoButton3" data-infopanel="infoPanel3" data-infosound="infoSound3" class="info-button">
+                <a-image src="#infobutton3" width="0.1" height="0.1" class="clickable"
+                         position="0.6 0.0141 0.01"  material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel3"
-                    src="#infoSvg3"
-                    visible="true"
-                    position="0.6 0.0141 0.01"    width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                <a-image id="infoPanel3" src="#infoSvg3" visible="false" position="0.6 0.0141 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton4"
-                    src="#infobutton4"
-                    width="0.1"        height="0.1"        class="clickable"
-                    position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
-                    info-button-listener>
+            <a-entity id="infoButton4" data-infopanel="infoPanel4" data-infosound="infoSound4" class="info-button">
+                <a-image src="#infobutton4" width="0.1" height="0.1" class="clickable"
+                         position="0.2 0.0141 0.01" material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel4"
-                    src="#infoSvg4"
-                    visible="true"
-                    position="0.2 0.0141 0.01"   width="0.4"    height="0.5"
-                    material="shader: flat; npot: true; transparent: true; opacity: 1">
+                <a-image id="infoPanel4" src="#infoSvg4" visible="false" position="0.2 0.0141 0.01"
+                         width="0.4" height="0.5" material="shader: flat; npot: true; transparent: true; opacity: 0">
                 </a-image>
             </a-entity>
         </a-entity>
@@ -262,9 +173,82 @@
             </a-image>
         </a-entity>
 
-        </a-scene>
+    </a-scene>
 
     <script>
+        AFRAME.registerComponent('info-button-listener', {
+            init: function () {
+                const el = this.el;
+                const panelId = el.getAttribute('data-infopanel');
+                const soundId = el.getAttribute('data-infosound');
+                const panelEl = document.getElementById(panelId);
+                const soundEl = document.getElementById(soundId);
+
+                // Ensure elements exist
+                if (!panelEl) {
+                    console.error(`Info panel with ID ${panelId} not found!`);
+                    return;
+                }
+                if (!soundEl) {
+                    console.error(`Info sound with ID ${soundId} not found!`);
+                    return;
+                }
+
+                el.addEventListener('click', () => {
+                    this.showInfo(panelEl, soundEl);
+                });
+            },
+            showInfo: function (panelEl, soundEl) {
+                // Hide all panels and stop all sounds
+                const infoPanels = document.querySelectorAll('[id^="infoPanel"]');
+                const infoSounds = document.querySelectorAll('[id^="infoSound"]');
+
+                infoPanels.forEach(p => {
+                    p.setAttribute('visible', false);
+                    p.setAttribute('material', 'opacity: 0');
+                });
+                infoSounds.forEach(s => {
+                    s.pause();
+                    s.currentTime = 0;
+                });
+
+                // Show the selected panel and play the sound
+                panelEl.setAttribute('visible', true);
+                panelEl.setAttribute('material', 'opacity: 1');
+                soundEl.play();
+            }
+        });
+
+        AFRAME.registerComponent('random-fly', {
+            schema: {
+                speed: { type: 'number', default: 3000 }
+            },
+            init: function () {
+                this.startRandomAnimation();
+            },
+            startRandomAnimation: function () {
+                const el = this.el;
+                const speed = this.data.speed;
+
+                function setRandomPosition() {
+                    const x = (Math.random() - 0.5) * 2;
+                    const y = 0.1 + Math.random() * 1;
+                    const z = -0.8 + Math.random() * 0.2;
+
+                    el.setAttribute('animation__move', {
+                        property: 'position',
+                        to: `${x} ${y} ${z}`,
+                        dur: speed,
+                        easing: 'easeInOutSine',
+                        loop: false
+                    });
+                }
+
+                setInterval(setRandomPosition, speed);
+                setRandomPosition();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const scene = document.querySelector('a-scene');
             const flyingEffectsContainer = document.querySelector('#flyingEffects');
@@ -276,9 +260,9 @@
                     fx.setAttribute('id', `flyingEffect${i}`);
                     fx.setAttribute('visible', true);
 
-                    const x = (Math.random() - 0.5) * 2;    // Adjust range for AR
-                    const y = 0.1 + Math.random() * 1;      // Adjust range for AR
-                    const z = -0.8 + Math.random() * 0.2;    // Adjust Z position for AR
+                    const x = (Math.random() - 0.5) * 2;
+                    const y = 0.1 + Math.random() * 1;
+                    const z = -0.8 + Math.random() * 0.2;
 
                     fx.setAttribute('position', `${x} ${y} ${z}`);
                     flyingEffectsContainer.appendChild(fx);
