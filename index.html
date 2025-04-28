@@ -2,21 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>AR Info Panel</title>
+    <title>AR Info Panel (ES Modules)</title>
     <script>
-        // **MOST ROBUST FIX for popup.js error:**
-        // Use an immediately invoked function expression (IIFE) to ensure this code runs FIRST.
-        (function() {
-            if (typeof window.myObject === 'undefined') {
-                window.myObject = {
-                    create: function() {
-                        console.warn("myObject.create() called, but popup.js may not be loaded.");
-                        return true; // Or return a suitable default value
-                    }
-                };
-            }
-        })();
-
         // Suppress WebGL warnings
         const originalConsoleWarn = console.warn;
         const originalConsoleError = console.error;
@@ -41,90 +28,21 @@
     </script>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script>
-        function showInfoPanel(infoId) {
-            console.log('showInfoPanel called with:', infoId);
-
-            // Hide all panels
-            for (let i = 1; i <= 4; i++) {
-                const panel = document.querySelector(`#infoPanel${i}`);
-                if (panel) panel.setAttribute('visible', false);
-            }
-
-            // Show selected panel
-            const selectedPanel = document.querySelector(`#${infoId}`);
-            if (selectedPanel) selectedPanel.setAttribute('visible', true);
-        }
-
-        AFRAME.registerComponent('info-button-listener', {
-            init: function () {
-                const buttonNumber = this.el.id.slice(-1);
-                const infoPanelId = `infoPanel${buttonNumber}`;
-                const self = this;
-
-                this.el.addEventListener('click', function () {
-                    console.log('Button', buttonNumber, 'clicked');
-                    showInfoPanel(infoPanelId);
-                });
-
-                this.el.addEventListener('touchstart', function () {
-                    console.log('Button', buttonNumber, 'touched');
-                    showInfoPanel(infoPanelId);
-                });
-            }
-        });
-
-        AFRAME.registerComponent('random-fly', {
-            schema: {
-                speed: { type: 'number', default: 3000 }
-            },
-            init: function () {
-                this.startRandomAnimation();
-            },
-            startRandomAnimation: function () {
-                const el = this.el;
-                const speed = this.data.speed;
-
-                function setRandomPosition() {
-                    const x = (Math.random() - 0.5) * 4;
-                    const y = 0.2 + Math.random() * 1.8;
-                    const z = -2.8 + Math.random() * 0.4;
-
-                    el.setAttribute('animation__move', {
-                        property: 'position',
-                        to: `${x} ${y} ${z}`,
-                        dur: speed,
-                        easing: 'easeInOutSine',
-                        loop: false
-                    });
-                }
-
-                setInterval(setRandomPosition, speed);
-                setRandomPosition();
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = document.querySelector('a-scene');
-            const flyingEffectsContainer = document.querySelector('#flyingEffects');
-            const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
-
-            scene.addEventListener('loaded', () => {
-                for (let i = 0; i < 20; i++) {
-                    const fx = flyingEffectTemplate.cloneNode(true);
-                    fx.setAttribute('id', `flyingEffect${i}`);
-                    fx.setAttribute('visible', true);
-
-                    const x = (Math.random() - 0.5) * 2;
-                    const y = 0.1 + Math.random() * 1;
-                    const z = -0.8 + Math.random() * 0.2;
-
-                    fx.setAttribute('position', `${x} ${y} ${z}`);
-                    flyingEffectsContainer.appendChild(fx);
-                }
-            });
-        });
-    </script>
+    <style>
+      .info-panel {
+        display: none;
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border: 1px solid #ccc;
+        top: 50px;
+        left: 50px;
+        z-index: 1000;
+      }
+      .info-panel.visible {
+        display: block;
+      }
+    </style>
 </head>
 <body>
     <a-scene
@@ -134,126 +52,69 @@
         arjs="detectionMode: mono_and_matrix; debugUIEnabled: true; sourceType: webcam; patternRatio: 0.5">
 
         <a-assets timeout="10000">
-            <img id="img1"
-                src="./public/assets/images/img1.png"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
-            <img id="infoSvg1"
-                src="./public/assets/images/info1.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infoSvg2"
-                src="./public/assets/images/info2.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infoSvg3"
-                src="./public/assets/images/info3.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infoSvg4"
-                src="./public/assets/images/info4.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
-            <img id="infobutton1"
-                src="./public/assets/images/infobutton1.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infobutton2"
-                src="./public/assets/images/infobutton2.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infobutton3"
-                src="./public/assets/images/infobutton3.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-            <img id="infobutton4"
-                src="./public/assets/images/infobutton4.svg"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
-
-            <img id="flyingEffect"
-                src="./public/assets/images/flyingeffect.png"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="img1" src="./public/assets/images/img1.png" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg1" src="./public/assets/images/info1.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg2" src="./public/assets/images/info2.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg3" src="./public/assets/images/info3.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infoSvg4" src="./public/assets/images/info4.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton1" src="./public/assets/images/infobutton1.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton2" src="./public/assets/images/infobutton2.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton3" src="./public/assets/images/infobutton3.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="infobutton4" src="./public/assets/images/infobutton4.svg" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
+            <img id="flyingEffect"  src="./public/assets/images/flyingeffect.png" crossorigin="anonymous"
+                 onerror="this.onerror=null; console.log('Error loading image:', this.src);">
         </a-assets>
 
         <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls></a-camera>
 
         <a-entity id="imageContainer" position="0 0 -1.2">
-            <a-image
-                id="baseImage"
-                src="#img1"
-                width="3"        height="1.25"        material="shader: flat; npot: true; transparent: true">
+            <a-image id="baseImage" src="#img1" width="3" height="1.25"
+                     material="shader: flat; npot: true; transparent: true">
             </a-image>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton1"
-                    src="#infobutton1"
-                    width="0.3"        height="0.1"
-                    position="-0.6 0.01 0.01" material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel1"
-                    info-button-listener>
+            <a-entity id="infoButton1" data-infopanel="infoPanel1">
+                <a-image src="#infobutton1" width="0.3" height="0.1" position="-0.6 0.01 0.01"
+                         material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel1"
-                    src="#infoSvg1"
-                    visible="false"
-                    position="-0.6 -0.2 0.02" width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
-                </a-image>
+                <div id="infoPanel1" class="info-panel">
+                    <img src="#infoSvg1" width="600" height="300">
+                </div>
             </a-entity>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton2"
-                    src="#infobutton2"
-                    width="0.3"        height="0.1"
-                    position="-0.4 -0.2 0.01"  material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel2"
-                    info-button-listener>
+            <a-entity id="infoButton2" data-infopanel="infoPanel2">
+                <a-image src="#infobutton2" width="0.3" height="0.1" position="-0.4 -0.2 0.01"
+                         material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel2"
-                    src="#infoSvg2"
-                    visible="false"
-                    position="-0.4 -0.41 0.02"    width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
-                </a-image>
+                <div id="infoPanel2" class="info-panel">
+                    <img src="#infoSvg2" width="600" height="300">
+                </div>
             </a-entity>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton3"
-                    src="#infobutton3"
-                    width="0.3"        height="0.1"
-                    position="1 0.0141 0.01"  material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel3"
-                    info-button-listener>
+            <a-entity id="infoButton3" data-infopanel="infoPanel3">
+                <a-image src="#infobutton3" width="0.3" height="0.1" position="1 0.0141 0.01"
+                         material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel3"
-                    src="#infoSvg3"
-                    visible="false"
-                    position="1 -0.2 0.02"    width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
-                </a-image>
+                <div id="infoPanel3" class="info-panel">
+                    <img src="#infoSvg3" width="600" height="300">
+                </div>
             </a-entity>
 
-            <a-entity position="0 0 0">
-                <a-image
-                    id="infobutton4"
-                    src="#infobutton4"
-                    width="0.3"        height="0.1"
-                    position="0.4 0.0141 0.01" material="shader: flat; npot: true; transparent: true"
-                    data-infopanel="infoPanel4"
-                    info-button-listener>
+            <a-entity id="infoButton4" data-infopanel="infoPanel4">
+                <a-image src="#infobutton4" width="0.3" height="0.1" position="0.4 0.0141 0.01"
+                         material="shader: flat; npot: true; transparent: true">
                 </a-image>
-                <a-image
-                    id="infoPanel4"
-                    src="#infoSvg4"
-                    visible="false"
-                    position="0.4 -0.2 0.02"   width="0.6"    height="0.3"        material="shader: flat; npot: true; transparent: true">
-                </a-image>
+                <div id="infoPanel4" class="info-panel">
+                    <img src="#infoSvg4" width="600" height="300">
+                </div>
             </a-entity>
         </a-entity>
 
@@ -269,30 +130,81 @@
             </a-image>
         </a-entity>
 
-        </a-scene>
+    </a-scene>
 
-    <script>
-        // Modify the flying effect creation for AR
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = document.querySelector('a-scene');
-            const flyingEffectsContainer = document.querySelector('#flyingEffects');
-            const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
+<script type="module">
+    // utils.js
+    function showInfoPanel(infoId) {
+        console.log('showInfoPanel called with:', infoId);
+        const panels = document.querySelectorAll('.info-panel');
+        panels.forEach(panel => panel.classList.remove('visible'));
+        const selectedPanel = document.getElementById(infoId);
+        if (selectedPanel) {
+            selectedPanel.classList.add('visible');
+        }
+    }
 
-            scene.addEventListener('loaded', () => {
-                for (let i = 0; i < 20; i++) {
-                    const fx = flyingEffectTemplate.cloneNode(true);
-                    fx.setAttribute('id', `flyingEffect${i}`);
-                    fx.setAttribute('visible', true);
+    // random-fly.js
+    AFRAME.registerComponent('random-fly', {
+        schema: {
+            speed: { type: 'number', default: 3000 }
+        },
+        init: function () {
+            this.startRandomAnimation();
+        },
+        startRandomAnimation: function () {
+            const el = this.el;
+            const speed = this.data.speed;
 
-                    const x = (Math.random() - 0.5) * 2;
-                    const y = 0.1 + Math.random() * 1;
-                    const z = -0.8 + Math.random() * 0.2;
+            function setRandomPosition() {
+                const x = (Math.random() - 0.5) * 4;
+                const y = 0.2 + Math.random() * 1.8;
+                const z = -2.8 + Math.random() * 0.4;
 
-                    fx.setAttribute('position', `${x} ${y} ${z}`);
-                    flyingEffectsContainer.appendChild(fx);
-                }
+                el.setAttribute('animation__move', {
+                    property: 'position',
+                    to: `${x} ${y} ${z}`,
+                    dur: speed,
+                    easing: 'easeInOutSine',
+                    loop: false
+                });
+            }
+
+            setInterval(setRandomPosition, speed);
+            setRandomPosition();
+        }
+    });
+
+
+    // main.js
+    document.addEventListener('DOMContentLoaded', () => {
+        const scene = document.querySelector('a-scene');
+        const flyingEffectsContainer = document.querySelector('#flyingEffects');
+        const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
+
+        scene.addEventListener('loaded', () => {
+            for (let i = 0; i < 20; i++) {
+                const fx = flyingEffectTemplate.cloneNode(true);
+                fx.setAttribute('id', `flyingEffect${i}`);
+                fx.setAttribute('visible', true);
+
+                const x = (Math.random() - 0.5) * 2;
+                const y = 0.1 + Math.random() * 1;
+                const z = -0.8 + Math.random() * 0.2;
+
+                fx.setAttribute('position', `${x} ${y} ${z}`);
+                flyingEffectsContainer.appendChild(fx);
+            }
+        });
+
+        // Info button listeners
+        document.querySelectorAll('[data-infopanel]').forEach(button => {
+            button.addEventListener('click', () => {
+                const panelId = button.getAttribute('data-infopanel');
+                showInfoPanel(panelId);
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
