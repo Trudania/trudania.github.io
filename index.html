@@ -3,318 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Info Panel with Marker Tracking</title>
-
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-
+    <title>Château de Brissac Interactive Experience</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
     <style>
-        /* Basic styling for the body */
         body {
             margin: 0;
-            overflow: hidden; /* Hide scrollbars */
+            padding: 0;
+            overflow-x: hidden;
+            font-family: Arial, sans-serif;
         }
-
-        /* Style the A-Frame loading screen */
-        #loading-screen {
+        
+        .camera-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        #camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .flying-effects-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            pointer-events: none;
+            z-index: 5;
         }
-
-        #loading-screen.hidden {
+        
+        .flying-effect {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('assets/flyingeffect.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            animation: float 10s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+        
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+        }
+        
+        .image-container {
+            position: relative;
+            margin: 20px auto;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .hotspot {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(0, 123, 255, 0.7);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+        }
+        
+        .hotspot img {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-panel {
             display: none;
+            position: absolute;
+            width: 30%;
+            height: 50%;
+            background-color: white;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transform: translate(-50%, 0);
+            min-height: 120px;
+            max-height: 200px;
+        }
+        
+        .info-content {
+            position: relative;
+            text-align: center;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 0;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .info-text {
+            margin-top: 10px;
+            font-family: 'Libre Baskerville', serif;
+            font-size: 12px;
+            line-height: 1.5;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-
-    <div id="loading-screen">
-        <p>Loading AR experience...</p>
+    <!-- Camera Feed -->
+    <div class="camera-container">
+        <video id="camera-feed" autoplay playsinline></video>
     </div>
 
-    <a-scene
-        renderer="antialias: true; colorManagement: true;"
-        loading-screen="enabled: true"
-        vr-mode-ui="enabled: false"
-        arjs="detectionMode: mono_and_matrix; sourceType: webcam; patternRatio: 0.5; debugUIEnabled: false;">
-
-        <a-assets timeout="10000">
-            <img id="img1"
-                 src="https://placehold.co/800x500/cccccc/000000?text=Base+Image"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-
-            <img id="infoSvg1"
-                 src="https://placehold.co/400x500/ff0000/ffffff?text=Info+Panel+1"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-            <img id="infoSvg2"
-                 src="https://placehold.co/400x500/00ff00/ffffff?text=Info+Panel+2"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-            <img id="infoSvg3"
-                 src="https://placehold.co/400x500/0000ff/ffffff?text=Info+Panel+3"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-            <img id="infoSvg4"
-                 src="https://placehold.co/400x500/ffff00/000000?text=Info+Panel+4"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-
-            <img id="infobutton1"
-                 src="https://placehold.co/100x100/007bff/ffffff?text=Btn1"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-            <img id="infobutton2"
-                 src="https://placehold.co/100x100/007bff/ffffff?text=Btn2"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-            <img id="infobutton3"
-                 src="https://placehold.co/100x100/007bff/ffffff?text=Btn3"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-            <img id="infobutton4"
-                 src="https://placehold.co/100x100/007bff/ffffff?text=Btn4"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-
-            <img id="flyingEffect"
-                 src="https://placehold.co/75x75/800080/ffffff?text=FX"
-                 crossorigin="anonymous"
-                 onerror="this.onerror=null; console.error('Error loading image:', this.src);">
-
-            <audio id="infoSound1"
-                   src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_1MG.wav"
-                   preload="auto"
-                   crossorigin="anonymous"
-                   onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
-            <audio id="infoSound2"
-                   src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_2MG.wav"
-                   preload="auto"
-                   crossorigin="anonymous"
-                   onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
-            <audio id="infoSound3"
-                   src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_5MG.wav"
-                   preload="auto"
-                   crossorigin="anonymous"
-                   onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
-            <audio id="infoSound4"
-                   src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_1MG.wav"
-                   preload="auto"
-                   crossorigin="anonymous"
-                   onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
-        </a-assets>
-
-        <a-camera position="0 0 0" look-controls-enabled="false" arjs-look-controls></a-camera>
-
-        <a-marker type='pattern' url='https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/build/examples/pattern-files/pattern-hiro.patt'>
-
-            <a-image
-                id="baseImage"
-                src="#img1"
-                width="2" height="1.25"
-                position="0 0 0"  material="shader: flat; npot: true; transparent: true">
-            </a-image>
-
-            <a-entity id="infoButton1" data-infopanel="infoPanel1" data-infosound="infoSound1" class="info-button"
-                      position="-0.6 0.01 0.01" info-button-listener>
-                <a-image src="#infobutton1" width="0.1" height="0.1" class="clickable"
-                         position="0 0 0"> </a-image>
-                <a-image id="infoPanel1" src="#infoSvg1"
-                         position="-0.3 0.3 0.02"  width="0.4" height="0.5"
-                         material="shader: flat; npot: true; transparent: true; opacity: 0"
-                         visible="false">
-                </a-image>
-            </a-entity>
-
-            <a-entity id="infoButton2" data-infopanel="infoPanel2" data-infosound="infoSound2" class="info-button"
-                      position="-0.4 -0.2 0.01" info-button-listener>
-                <a-image src="#infobutton2" width="0.1" height="0.1" class="clickable"
-                         position="0 0 0"> </a-image>
-                 <a-image id="infoPanel2" src="#infoSvg2"
-                         position="-0.2 0.3 0.02"  width="0.4" height="0.5"
-                         material="shader: flat; npot: true; transparent: true; opacity: 0"
-                         visible="false">
-                </a-image>
-            </a-entity>
-
-            <a-entity id="infoButton3" data-infopanel="infoPanel3" data-infosound="infoSound3" class="info-button"
-                      position="0.6 0.0141 0.01" info-button-listener>
-                <a-image src="#infobutton3" width="0.1" height="0.1" class="clickable"
-                         position="0 0 0"> </a-image>
-                 <a-image id="infoPanel3" src="#infoSvg3"
-                         position="-0.3 0.3 0.02"  width="0.4" height="0.5"
-                         material="shader: flat; npot: true; transparent: true; opacity: 0"
-                         visible="false">
-                </a-image>
-            </a-entity>
-
-            <a-entity id="infoButton4" data-infopanel="infoPanel4" data-infosound="infoSound4" class="info-button"
-                      position="0.2 0.0141 0.01" info-button-listener>
-                <a-image src="#infobutton4" width="0.1" height="0.1" class="clickable"
-                         position="0 0 0"> </a-image>
-                 <a-image id="infoPanel4" src="#infoSvg4"
-                         position="-0.2 0.3 0.02"  width="0.4" height="0.5"
-                         material="shader: flat; npot: true; transparent: true; opacity: 0"
-                         visible="false">
-                </a-image>
-            </a-entity>
-
-             <a-entity id="flyingEffects">
-                <a-image
-                    id="flyingEffectTemplate"
-                    src="#flyingEffect"
-                    width="0.075"
-                    height="0.075"
-                    material="transparent: true; opacity: 0.8; shader: flat; npot: true"
-                    random-fly=""
-                    visible="false">
-                </a-image>
-            </a-entity>
-
-        </a-marker>
-
-        </a-scene>
-
+    <div class="container">
+        <!-- Title removed -->
+        
+        <!-- Flying effects container -->
+        <div id="flyingEffects" class="flying-effects-container"></div>
+        
+        <!-- Audio elements -->
+        <audio id="audio1" src="assets/info1.mp3" preload="auto"></audio>
+        <audio id="audio2" src="assets/info2.mp3" preload="auto"></audio>
+        <audio id="audio3" src="assets/info4.mp3" preload="auto"></audio>
+        <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
+        
+        <div class="image-container">
+            <img src="assets/img1.png" alt="Château de Brissac">
+            
+            <div class="hotspot" id="hotspot1" data-position="-0.6 0.01 0.01">
+                <img src="assets/infobutton.png" alt="Info 1">
+            </div>
+            <div class="info-panel" id="panel1">
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
+                </div>
+            </div>
+            
+            <div class="hotspot" id="hotspot2" data-position="-0.4 0.4 0.01">
+                <img src="assets/infobutton.png" alt="Info 2">
+            </div>
+            <div class="info-panel" id="panel2">
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+                </div>
+            </div>
+            
+            <div class="hotspot" id="hotspot3" data-position="0.6 0.0141 0.01">
+                <img src="assets/infobutton.png" alt="Info 3">
+            </div>
+            <div class="info-panel" id="panel3">
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+                </div>
+            </div>
+            
+            <div class="hotspot" id="hotspot4" data-position="0.2 0.0141 0.01">
+                <img src="assets/infobutton.png" alt="Info 4">
+            </div>
+            <div class="info-panel" id="panel4">
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        // A-Frame Component to handle info button clicks
-        AFRAME.registerComponent('info-button-listener', {
-            init: function () {
-                const el = this.el; // The entity this component is attached to (e.g., infoButton1)
-                const panelId = el.getAttribute('data-infopanel'); // Get the ID of the linked info panel
-                const soundId = el.getAttribute('data-infosound'); // Get the ID of the linked audio
-                const panelEl = document.getElementById(panelId); // Get the info panel element
-                const soundEl = document.getElementById(soundId); // Get the audio element
-
-                // Basic error checking to ensure linked elements exist
-                if (!panelEl) {
-                    console.error(`Info panel with ID ${panelId} not found for entity ${el.id}!`);
-                    return;
-                }
-                // Audio is optional, so log a warning instead of error if not found
-                if (!soundEl) {
-                    console.warn(`Info sound with ID ${soundId} not found for entity ${el.id}. Audio playback will be skipped.`);
-                }
-
-                // Add click listener to the entity (or a child element if needed)
-                // We'll attach it to the parent entity for simplicity here
-                el.addEventListener('click', () => {
-                    this.showInfo(panelEl, soundEl);
-                });
-            },
-
-            // Function to show the selected info panel and play audio
-            showInfo: function (panelEl, soundEl) {
-                // Hide all other info panels and stop all sounds
-                const allInfoPanels = document.querySelectorAll('[id^="infoPanel"]');
-                const allInfoSounds = document.querySelectorAll('audio[id^="infoSound"]');
-
-                allInfoPanels.forEach(p => {
-                    // Use A-Frame's setAttribute for visibility and material properties
-                    p.setAttribute('visible', false);
-                    p.setAttribute('material', 'opacity: 0');
-                });
-
-                allInfoSounds.forEach(s => {
-                    s.pause();
-                    s.currentTime = 0; // Rewind audio
-                });
-
-                // Show the selected panel and make it fully opaque
-                panelEl.setAttribute('visible', true);
-                panelEl.setAttribute('material', 'opacity: 1');
-
-                // Play the selected sound if it exists
-                if (soundEl) {
-                    soundEl.play().catch(error => {
-                         console.error("Audio playback failed:", error);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create flying effects
+            const flyingEffectsContainer = document.getElementById('flyingEffects');
+            
+            // Create multiple flying effects
+            for (let i = 0; i < 20; i++) {
+                const fx = document.createElement('div');
+                fx.classList.add('flying-effect');
+                fx.id = `flyingEffect${i}`;
+                
+                // Random positions
+                const x = Math.random() * 100; // percentage across screen
+                const y = Math.random() * 100; // percentage down screen
+                const scale = 0.5 + Math.random() * 1; // random size
+                const duration = 5 + Math.random() * 10; // random animation duration
+                
+                fx.style.left = `${x}%`;
+                fx.style.top = `${y}%`;
+                fx.style.transform = `scale(${scale})`;
+                fx.style.animationDuration = `${duration}s`;
+                fx.style.animationDelay = `${Math.random() * 5}s`;
+                
+                flyingEffectsContainer.appendChild(fx);
+            }
+            
+            // Start camera
+            const video = document.getElementById('camera-feed');
+            
+            // Check if browser supports getUserMedia
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                    })
+                    .catch(function(error) {
+                        console.error("Could not access the camera: ", error);
                     });
-                }
             }
-        });
-
-        // A-Frame Component for random flying animation
-        AFRAME.registerComponent('random-fly', {
-            schema: {
-                speed: { type: 'number', default: 3000 }, // Animation duration in milliseconds
-                area: { type: 'vec3', default: {x: 1, y: 1, z: 0.5} } // Define the random movement area (relative to parent)
-            },
-
-            init: function () {
-                this.startRandomAnimation();
-            },
-
-            // Function to set a new random position and start animation
-            startRandomAnimation: function () {
-                const el = this.el; // The flying effect entity
-                const speed = this.data.speed;
-                const area = this.data.area;
-
-                // Generate random position within the defined area
-                // Positions are relative to the parent entity (the marker in this case)
-                const x = (Math.random() - 0.5) * area.x;
-                const y = (Math.random() - 0.5) * area.y;
-                const z = (Math.random() - 0.5) * area.z;
-
-                // Set up and start the animation
-                el.setAttribute('animation__move', {
-                    property: 'position',
-                    to: `${x} ${y} ${z}`,
-                    dur: speed,
-                    easing: 'easeInOutSine',
-                    loop: false // Animation runs once per interval
-                });
-
-                // Listen for animation completion to start the next one
-                el.addEventListener('animation__move-end', () => {
-                    this.startRandomAnimation(); // Start a new animation when the current one ends
-                });
-            }
-        });
-
-        // JavaScript to instantiate multiple flying effects after the scene is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            const sceneEl = document.querySelector('a-scene');
-
-            // Wait for the A-Frame scene to be fully loaded
-            sceneEl.addEventListener('loaded', () => {
-                const flyingEffectsContainer = document.querySelector('#flyingEffects');
-                const flyingEffectTemplate = document.querySelector('#flyingEffectTemplate');
-
-                // Create 20 instances of the flying effect template
-                for (let i = 0; i < 20; i++) {
-                    const fx = flyingEffectTemplate.cloneNode(true); // Clone the template
-                    fx.setAttribute('id', `flyingEffect${i}`); // Give it a unique ID
-                    fx.setAttribute('visible', true); // Make it visible
-
-                    // Set an initial random position within the defined area
-                    // Ensure random-fly component is initialized on the template before accessing its schema
-                    const templateRandomFly = flyingEffectTemplate.components['random-fly'];
-                     const area = (templateRandomFly && templateRandomFly.data.area) || {x: 1, y: 1, z: 0.5};
-
-                    const x = (Math.random() - 0.5) * area.x;
-                    const y = (Math.random() - 0.5) * area.y;
-                    const z = (Math.random() - 0.5) * area.z;
-                    fx.setAttribute('position', `${x} ${y} ${z}`);
-
-                    flyingEffectsContainer.appendChild(fx); // Add the cloned entity to the container
+            
+            // Position hotspots and info panels
+            const imageContainer = document.querySelector('.image-container');
+            const hotspots = document.querySelectorAll('.hotspot');
+            const panels = document.querySelectorAll('.info-panel');
+            const closeBtns = document.querySelectorAll('.close-btn');
+            
+            // Position hotspots based on data-position attribute
+            hotspots.forEach((hotspot, index) => {
+                if (hotspot.dataset.position) {
+                    const [x, y, z] = hotspot.dataset.position.split(' ').map(Number);
+                    
+                    // Convert coordinates to percentages
+                    const leftPercent = ((x + 1) / 2) * 100;
+                    const topPercent = ((y + 1) / 2) * 100;
+                    
+                    hotspot.style.left = leftPercent + '%';
+                    hotspot.style.top = topPercent + '%';
+                    
+                    // Position corresponding panel under the hotspot
+                    const panel = panels[index];
+                    panel.style.left = leftPercent + '%';
+                    panel.style.top = (topPercent + 5) + '%';
                 }
-
-                // Hide the loading screen once the scene is ready
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.classList.add('hidden');
-                }
+            });
+            
+            // Add click event to each hotspot
+            hotspots.forEach((hotspot, index) => {
+                hotspot.addEventListener('click', function(e) {
+                    // Hide all panels
+                    panels.forEach(panel => {
+                        panel.style.display = 'none';
+                    });
+                    
+                    // Show corresponding panel
+                    panels[index].style.display = 'block';
+                    
+                    // Stop all audio
+                    document.querySelectorAll('audio').forEach(audio => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    });
+                    
+                    // Play corresponding audio
+                    const audio = document.getElementById(`audio${index+1}`);
+                    if (audio) {
+                        audio.play().catch(error => {
+                            console.error("Audio playback error:", error);
+                        });
+                    }
+                    
+                    e.stopPropagation();
+                });
+            });
+            
+            // Close info panel when clicking the close button
+            closeBtns.forEach((btn, index) => {
+                btn.addEventListener('click', function(e) {
+                    panels[index].style.display = 'none';
+                    e.stopPropagation();
+                });
+            });
+            
+            // Close all panels when clicking elsewhere
+            document.addEventListener('click', function() {
+                panels.forEach(panel => {
+                    panel.style.display = 'none';
+                });
+            });
+            
+            // Prevent closing when clicking on the panel itself
+            panels.forEach(panel => {
+                panel.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
             });
         });
     </script>
 </body>
-</html>
+</html> 
