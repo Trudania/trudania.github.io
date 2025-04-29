@@ -94,18 +94,22 @@
             <audio id="infoSound1"
                    src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_1MG.wav"
                    preload="auto"
+                   crossorigin="anonymous"
                    onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
             <audio id="infoSound2"
                    src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_2MG.wav"
                    preload="auto"
+                   crossorigin="anonymous"
                    onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
             <audio id="infoSound3"
                    src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_5MG.wav"
                    preload="auto"
+                   crossorigin="anonymous"
                    onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
             <audio id="infoSound4"
                    src="https://file-examples.com/storage/fe103015080c03a35a54c46/2017/11/file_example_WAV_1MG.wav"
                    preload="auto"
+                   crossorigin="anonymous"
                    onerror="this.onerror=null; console.error('Error loading audio:', this.src);"></audio>
         </a-assets>
 
@@ -121,7 +125,8 @@
             </a-image>
 
             <a-entity id="infoButton1" data-infopanel="infoPanel1" data-infosound="infoSound1" class="info-button"
-                      position="-0.6 0.01 0.01" info-button-listener> <a-image src="#infobutton1" width="0.1" height="0.1" class="clickable"
+                      position="-0.6 0.01 0.01" info-button-listener>
+                <a-image src="#infobutton1" width="0.1" height="0.1" class="clickable"
                          position="0 0 0"> </a-image>
                 <a-image id="infoPanel1" src="#infoSvg1"
                          position="-0.3 0.3 0.02"  width="0.4" height="0.5"
@@ -131,7 +136,8 @@
             </a-entity>
 
             <a-entity id="infoButton2" data-infopanel="infoPanel2" data-infosound="infoSound2" class="info-button"
-                      position="-0.4 -0.2 0.01" info-button-listener> <a-image src="#infobutton2" width="0.1" height="0.1" class="clickable"
+                      position="-0.4 -0.2 0.01" info-button-listener>
+                <a-image src="#infobutton2" width="0.1" height="0.1" class="clickable"
                          position="0 0 0"> </a-image>
                  <a-image id="infoPanel2" src="#infoSvg2"
                          position="-0.2 0.3 0.02"  width="0.4" height="0.5"
@@ -141,7 +147,8 @@
             </a-entity>
 
             <a-entity id="infoButton3" data-infopanel="infoPanel3" data-infosound="infoSound3" class="info-button"
-                      position="0.6 0.0141 0.01" info-button-listener> <a-image src="#infobutton3" width="0.1" height="0.1" class="clickable"
+                      position="0.6 0.0141 0.01" info-button-listener>
+                <a-image src="#infobutton3" width="0.1" height="0.1" class="clickable"
                          position="0 0 0"> </a-image>
                  <a-image id="infoPanel3" src="#infoSvg3"
                          position="-0.3 0.3 0.02"  width="0.4" height="0.5"
@@ -151,7 +158,8 @@
             </a-entity>
 
             <a-entity id="infoButton4" data-infopanel="infoPanel4" data-infosound="infoSound4" class="info-button"
-                      position="0.2 0.0141 0.01" info-button-listener> <a-image src="#infobutton4" width="0.1" height="0.1" class="clickable"
+                      position="0.2 0.0141 0.01" info-button-listener>
+                <a-image src="#infobutton4" width="0.1" height="0.1" class="clickable"
                          position="0 0 0"> </a-image>
                  <a-image id="infoPanel4" src="#infoSvg4"
                          position="-0.2 0.3 0.02"  width="0.4" height="0.5"
@@ -288,7 +296,10 @@
                     fx.setAttribute('visible', true); // Make it visible
 
                     // Set an initial random position within the defined area
-                    const area = flyingEffectTemplate.getAttribute('random-fly').area || {x: 1, y: 1, z: 0.5}; // Get area from component schema or default
+                    // Ensure random-fly component is initialized on the template before accessing its schema
+                    const templateRandomFly = flyingEffectTemplate.components['random-fly'];
+                     const area = (templateRandomFly && templateRandomFly.data.area) || {x: 1, y: 1, z: 0.5};
+
                     const x = (Math.random() - 0.5) * area.x;
                     const y = (Math.random() - 0.5) * area.y;
                     const z = (Math.random() - 0.5) * area.z;
