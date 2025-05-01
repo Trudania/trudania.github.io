@@ -90,8 +90,6 @@
             transform: translate(-50%, 0);
             min-height: 120px;
             max-height: 200px;
-            left: 50%;
-            top: calc(100% + 5px);
         }
         
         .info-content {
@@ -448,6 +446,10 @@
                 z: -3
             };
             
+            // Track active panel and audio
+            let activePanel = null;
+            let activeAudio = null;
+            
             // Zoom controls
             const zoomIn = document.getElementById('zoom-in');
             const zoomOut = document.getElementById('zoom-out');
@@ -509,7 +511,11 @@
             function updateTransform() {
                 imageContainer.setAttribute('position', `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`);
                 imageContainer.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
-                updatePanelPositions();
+                
+                // Only update panel positions, don't affect audio
+                if (activePanel) {
+                    requestAnimationFrame(updatePanelPositions);
+                }
             }
             
             // Reset position button
@@ -535,42 +541,58 @@
                 }
             });
             
+            // Store hotspot to panel relationships for positioning
+            const hotspotPanelMap = {};
+            
             function setupInteraction() {
                 // Add click event listeners to hotspots
                 const hotspots = document.querySelectorAll('.hotspot');
                 
                 hotspots.forEach(hotspot => {
+                    const panelId = hotspot.getAttribute('data-info-id');
+                    const audioId = hotspot.getAttribute('data-audio-id');
+                    
+                    // Store the wrapper for this hotspot
+                    const wrapper = hotspot.closest('.hotspot-wrapper');
+                    if (wrapper && panelId) {
+                        hotspotPanelMap[panelId] = wrapper;
+                    }
+                    
                     hotspot.addEventListener('click', function() {
-                        const panelId = this.getAttribute('data-info-id');
-                        const audioId = this.getAttribute('data-audio-id');
-                        
-                        // Hide all panels
+                        // Hide all panels except the active one
                         panels.forEach(panel => {
-                            panel.style.display = 'none';
+                            if (panel.id !== panelId) {
+                                panel.style.display = 'none';
+                            }
                         });
                         
-                        // Show corresponding panel
-                        if (panelId) {
-                            const panel = document.getElementById(panelId);
-                            panel.style.display = 'block';
+                        // If we're clicking a different hotspot
+                        if (activePanel !== panelId) {
+                            // Stop any existing audio
+                            if (activeAudio) {
+                                document.getElementById(activeAudio).pause();
+                                document.getElementById(activeAudio).currentTime = 0;
+                            }
                             
-                            // Update panel position
-                            updatePanelPositions();
-                        }
-                        
-                        // Stop all audio
-                        document.querySelectorAll('audio').forEach(audio => {
-                            audio.pause();
-                            audio.currentTime = 0;
-                        });
-                        
-                        // Play corresponding audio
-                        if (audioId) {
-                            const audio = document.getElementById(audioId);
-                            if (audio) {
-                                audio.play().catch(error => {
-                                    console.error("Audio playback error:", error);
-                                });
+                            // Show corresponding panel
+                            if (panelId) {
+                                const panel = document.getElementById(panelId);
+                                panel.style.display = 'block';
+                                activePanel = panelId;
+                                
+                                // Position the panel immediately
+                                updatePanelPositions();
+                            }
+                            
+                            // Play corresponding audio
+                            if (audioId) {
+                                const audio = document.getElementById(audioId);
+                                if (audio) {
+                                    audio.play().catch(error => {
+                                        console.error("Audio playback error:", error);
+                                    });
+                                    activeAudio = audioId;
+                                }
                             }
                         }
                     });
@@ -579,18 +601,17 @@
             
             // Function to update panel positions based on hotspot positions
             function updatePanelPositions() {
-                const hotspotWrappers = document.querySelectorAll('.hotspot-wrapper');
                 const scene = document.querySelector('a-scene');
                 const camera = document.querySelector('[camera]');
                 
-                hotspotWrappers.forEach((wrapper) => {
-                    const hotspot = wrapper.querySelector('.hotspot');
-                    if (!hotspot) return;
-                    
-                    const panelId = hotspot.getAttribute('data-info-id');
+                // If no scene or camera, exit early
+                if (!scene || !scene.canvas || !camera) return;
+                
+                for (const panelId in hotspotPanelMap) {
                     const panel = document.getElementById(panelId);
+                    const wrapper = hotspotPanelMap[panelId];
                     
-                    if (panel) {
+                    if (panel && panel.style.display === 'block' && wrapper) {
                         // Get world position of hotspot wrapper
                         const worldPos = new THREE.Vector3();
                         wrapper.object3D.getWorldPosition(worldPos);
@@ -613,7 +634,7 @@
                         panel.style.top = (y + 30) + 'px'; // 30px below hotspot
                         panel.style.transform = 'translate(-50%, 0)';
                     }
-                });
+                }
             }
             
             // Close info panel when clicking the close button
@@ -622,6 +643,9 @@
                     const panel = this.closest('.info-panel');
                     if (panel) {
                         panel.style.display = 'none';
+                        if (activePanel === panel.id) {
+                            activePanel = null;
+                        }
                     }
                     e.stopPropagation();
                 });
@@ -634,14 +658,23 @@
                     panels.forEach(panel => {
                         panel.style.display = 'none';
                     });
+                    activePanel = null;
                 }
             });
             
+            // Continuously update panel positions for smooth movement
+            function animatePanels() {
+                if (activePanel) {
+                    updatePanelPositions();
+                }
+                requestAnimationFrame(animatePanels);
+            }
+            
+            // Start the animation loop
+            animatePanels();
+            
             // Update panel positions when window resizes
             window.addEventListener('resize', updatePanelPositions);
-            
-            // Initial panel positions
-            setTimeout(updatePanelPositions, 500);
         });
     </script>
 </body>
