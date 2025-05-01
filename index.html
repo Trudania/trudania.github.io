@@ -467,59 +467,122 @@
                 z: -3
             };
             
-            // Track active panel and audio
+            // Track active panel
             let activePanel = null;
             
-            // Create dedicated audio controller
+            // IMPROVED AUDIO CONTROLLER - Complete rewrite to fix repetition issue
             const AudioController = {
                 currentAudio: null,
-                audios: {
+                audioElements: {
                     audio1: document.getElementById('audio1'),
                     audio2: document.getElementById('audio2'),
                     audio3: document.getElementById('audio3'),
                     audio4: document.getElementById('audio4')
                 },
+                transitioning: false,
+                fadeOutTime: 200, // ms to fade out current audio
                 
-                // Play a specific audio
-                play: function(audioId) {
-                    // If same audio is already playing, do nothing
-                    if (this.currentAudio === audioId && !this.audios[audioId].paused) {
-                        return;
-                    }
-                    
-                    // Stop any currently playing audio
-                    this.stopAll();
-                    
-                    // Play the new audio
-                    if (this.audios[audioId]) {
-                        this.audios[audioId].currentTime = 0;
-                        this.audios[audioId].play().catch(error => {
-                            console.error("Audio playback error:", error);
-                        });
-                        this.currentAudio = audioId;
-                    }
-                },
-                
-                // Stop a specific audio
-                stop: function(audioId) {
-                    if (this.audios[audioId]) {
-                        this.audios[audioId].pause();
-                        this.audios[audioId].currentTime = 0;
-                        if (this.currentAudio === audioId) {
-                            this.currentAudio = null;
+                // Preload all audio files to ensure they're ready
+                preloadAll: function() {
+                    for (const id in this.audioElements) {
+                        if (this.audioElements[id]) {
+                            this.audioElements[id].load();
+                            this.audioElements[id].preload = "auto";
+                            
+                            // Add ended event to reset audio state
+                            this.audioElements[id].addEventListener('ended', () => {
+                                if (this.currentAudio === id) {
+                                    this.currentAudio = null;
+                                }
+                            });
                         }
                     }
                 },
                 
-                // Stop all audio
-                stopAll: function() {
-                    for (const audioId in this.audios) {
-                        this.audios[audioId].pause();
-                        this.audios[audioId].currentTime = 0;
+                // Completely play a specific audio from start to finish
+                play: function(audioId) {
+                    // Prevent play during transition
+                    if (this.transitioning) return;
+                    
+                    // If same audio requested, ignore
+                    if (this.currentAudio === audioId) return;
+                    
+                    this.transitioning = true;
+                    
+                    // Function to start the new audio
+                    const startNewAudio = () => {
+                        const newAudio = this.audioElements[audioId];
+                        if (!newAudio) {
+                            this.transitioning = false;
+                            return;
+                        }
+                        
+                        // Reset to beginning
+                        newAudio.currentTime = 0;
+                        
+                        // Set volume to full
+                        newAudio.volume = 1.0;
+                        
+                        // Play the new audio
+                        const playPromise = newAudio.play();
+                        
+                        // Handle play promise to catch any errors
+                        if (playPromise !== undefined) {
+                            playPromise
+                                .then(() => {
+                                    this.currentAudio = audioId;
+                                    this.transitioning = false;
+                                })
+                                .catch(error => {
+                                    console.error("Audio playback error:", error);
+                                    this.transitioning = false;
+                                });
+                        } else {
+                            this.currentAudio = audioId;
+                            this.transitioning = false;
+                        }
+                    };
+                    
+                    // If there's currently audio playing, fade it out first
+                    if (this.currentAudio && this.audioElements[this.currentAudio]) {
+                        const currentAudioElement = this.audioElements[this.currentAudio];
+                        
+                        // Ensure it's playing before trying to fade
+                        if (!currentAudioElement.paused) {
+                            // Complete stop of current audio before starting new one
+                            currentAudioElement.pause();
+                            currentAudioElement.currentTime = 0;
+                            
+                            // Add a small delay before starting new audio
+                            setTimeout(startNewAudio, 50);
+                        } else {
+                            startNewAudio();
+                        }
+                    } else {
+                        startNewAudio();
                     }
+                },
+                
+                // Stop all audio completely
+                stopAll: function() {
+                    this.transitioning = true;
+                    
+                    // Immediately stop all audio
+                    for (const id in this.audioElements) {
+                        const audio = this.audioElements[id];
+                        if (audio) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                        }
+                    }
+                    
                     this.currentAudio = null;
+                    this.transitioning = false;
                 }
             };
+            
+            // Initialize audio
+            AudioController.preloadAll();
             
             // Flag to prevent interaction during camera movement
             let cameraMoving = false;
@@ -686,15 +749,23 @@
                         hotspotPanelMap[panelId] = wrapper;
                     }
                     
+                    // ADD THROTTLING to prevent rapid clicks - this helps audio issues
+                    let isClickable = true;
+                    
                     // Completely replace hotspot click handling
                     hotspot.addEventListener('click', function(e) {
-                        // Don't process clicks if camera is moving or time since last click is too short
-                        const now = Date.now();
-                        if (cameraMoving || (now - lastHotspotClick < 500)) {
+                        // Don't process clicks if camera is moving or throttled
+                        if (cameraMoving || !isClickable) {
                             e.stopPropagation();
                             return;
                         }
-                        lastHotspotClick = now;
+                        
+                        // Throttle clicks
+                        isClickable = false;
+                        setTimeout(() => { isClickable = true; }, 300);
+                        
+                        // Store timestamp of click
+                        lastHotspotClick = Date.now();
                         
                         // Hide all panels except the active one
                         panels.forEach(panel => {
