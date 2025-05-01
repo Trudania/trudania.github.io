@@ -106,6 +106,8 @@
             font-size: 24px;
             font-weight: bold;
             cursor: pointer;
+            z-index: 30;
+            padding: 5px 10px;
         }
         
         .info-text {
@@ -313,33 +315,33 @@
     <!-- Info panels outside of A-Frame -->
     <div id="aframe-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15;">
         <div id="panel1" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
-                </div>
-            </div>
-            
-        <div id="panel2" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
-                </div>
-            </div>
-            
-        <div id="panel3" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
-                </div>
-            </div>
-            
-        <div id="panel4" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
-                </div>
+            <div class="info-content">
+                <span class="close-btn" data-panel-id="panel1">&times;</span>
+                <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
             </div>
         </div>
+        
+        <div id="panel2" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn" data-panel-id="panel2">&times;</span>
+                <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+            </div>
+        </div>
+        
+        <div id="panel3" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn" data-panel-id="panel3">&times;</span>
+                <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+            </div>
+        </div>
+        
+        <div id="panel4" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn" data-panel-id="panel4">&times;</span>
+                <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+            </div>
+        </div>
+    </div>
     
     <!-- Controls -->
     <div class="controls">
@@ -445,7 +447,6 @@
             // Get image container and panels
             const imageContainer = document.getElementById('chateau-image-container');
             const panels = document.querySelectorAll('.info-panel');
-            const closeBtns = document.querySelectorAll('.close-btn');
             
             // Variables for positioning
             let currentScale = 1;
@@ -770,33 +771,52 @@
                 }
             }
             
-            // Close info panel when clicking the close button
-            closeBtns.forEach((btn) => {
-                btn.addEventListener('click', function(e) {
-                    const panel = this.closest('.info-panel');
-                    if (panel) {
-                        panel.style.display = 'none';
-                        if (activePanel === panel.id) {
-                            activePanel = null;
-                            // Stop audio through our controller
-                            AudioController.stopAll();
-                        }
+            // Fixed close panel function - this is the key change
+            function closePanel(panelId) {
+                const panel = document.getElementById(panelId);
+                if (panel) {
+                    panel.style.display = 'none';
+                    
+                    if (activePanel === panelId) {
+                        activePanel = null;
+                        AudioController.stopAll();
                     }
+                }
+            }
+            
+            // Improved close button handling
+            // Remove old event listeners first to prevent duplicates
+            const closeBtns = document.querySelectorAll('.close-btn');
+            closeBtns.forEach((btn) => {
+                // First remove any existing listeners by creating a new clone
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                // Add new event listener with improved handling
+                newBtn.addEventListener('click', function(e) {
+                    // Get panel ID from data attribute
+                    const panelId = this.getAttribute('data-panel-id');
+                    
+                    // Close the panel using our dedicated function
+                    if (panelId) {
+                        closePanel(panelId);
+                    }
+                    
+                    // Prevent event propagation completely
                     e.stopPropagation();
+                    e.preventDefault();
+                    return false;
                 });
             });
             
-            // Close all panels when clicking elsewhere
+            // Document click handler for closing panels
             document.addEventListener('click', function(e) {
                 // Don't close if clicking inside a panel, an A-Frame entity, or a button
                 if (!e.target.closest('.info-panel') && !e.target.closest('a-entity') && !e.target.closest('button')) {
-                panels.forEach(panel => {
-                    panel.style.display = 'none';
-                });
-                    
-                    // Stop all audio through our controller
-                    AudioController.stopAll();
-                    activePanel = null;
+                    // Use the closePanel function for consistency
+                    panels.forEach(panel => {
+                        closePanel(panel.id);
+                    });
                 }
             });
             
