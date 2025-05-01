@@ -450,12 +450,17 @@
             let activePanel = null;
             let activeAudio = null;
             
+            // Flag to ignore raycaster events during camera/object movements
+            let isMoving = false;
+            let moveTimeout;
+            
             // Zoom controls
             const zoomIn = document.getElementById('zoom-in');
             const zoomOut = document.getElementById('zoom-out');
             
             zoomIn.addEventListener('click', function() {
                 if (currentScale < maxScale) {
+                    startMovement();
                     currentScale += 0.25;
                     updateTransform();
                 }
@@ -463,45 +468,62 @@
             
             zoomOut.addEventListener('click', function() {
                 if (currentScale > minScale) {
+                    startMovement();
                     currentScale -= 0.25;
                     updateTransform();
                 }
             });
             
+            // Start movement mode to prevent unwanted audio/panel interaction
+            function startMovement() {
+                isMoving = true;
+                clearTimeout(moveTimeout);
+                moveTimeout = setTimeout(() => {
+                    isMoving = false;
+                }, 100); // Small buffer after movement stops
+            }
+            
             // Movement controls
             const moveStep = 0.3;
             
             document.getElementById('move-up').addEventListener('click', function() {
+                startMovement();
                 currentPosition.y += moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-down').addEventListener('click', function() {
+                startMovement();
                 currentPosition.y -= moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-left').addEventListener('click', function() {
+                startMovement();
                 currentPosition.x -= moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-right').addEventListener('click', function() {
+                startMovement();
                 currentPosition.x += moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-forward').addEventListener('click', function() {
+                startMovement();
                 currentPosition.z += moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-backward').addEventListener('click', function() {
+                startMovement();
                 currentPosition.z -= moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-center').addEventListener('click', function() {
+                startMovement();
                 currentPosition.x = 0;
                 currentPosition.y = 1.6;
                 updateTransform();
@@ -520,6 +542,7 @@
             
             // Reset position button
             document.getElementById('reset-position').addEventListener('click', function() {
+                startMovement();
                 currentScale = 1;
                 currentPosition = {
                     x: 0,
@@ -558,7 +581,22 @@
                         hotspotPanelMap[panelId] = wrapper;
                     }
                     
-                    hotspot.addEventListener('click', function() {
+                    // Prevent the default A-Frame click behavior that might be causing audio restarts
+                    hotspot.addEventListener('mouseenter', function(e) {
+                        if (isMoving) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            return false;
+                        }
+                    });
+                    
+                    hotspot.addEventListener('click', function(e) {
+                        // Prevent interaction during movement
+                        if (isMoving) {
+                            e.stopPropagation();
+                            return;
+                        }
+                        
                         // Hide all panels except the active one
                         panels.forEach(panel => {
                             if (panel.id !== panelId) {
@@ -566,38 +604,77 @@
                             }
                         });
                         
-                        // If we're clicking a different hotspot
-                        if (activePanel !== panelId) {
-                            // Stop any existing audio
-                            if (activeAudio) {
-                                document.getElementById(activeAudio).pause();
-                                document.getElementById(activeAudio).currentTime = 0;
-                            }
-                            
-                            // Show corresponding panel
-                            if (panelId) {
-                                const panel = document.getElementById(panelId);
+                        // Toggle the clicked panel
+                        const panel = document.getElementById(panelId);
+                        if (panel) {
+                            if (activePanel === panelId) {
+                                // If already active, toggle it off
+                                panel.style.display = 'none';
+                                activePanel = null;
+                                
+                                // Stop audio
+                                if (activeAudio) {
+                                    const audio = document.getElementById(activeAudio);
+                                    if (audio) {
+                                        audio.pause();
+                                        audio.currentTime = 0;
+                                    }
+                                    activeAudio = null;
+                                }
+                            } else {
+                                // If not active, show it and play audio
                                 panel.style.display = 'block';
                                 activePanel = panelId;
+                                
+                                // Stop any existing audio
+                                if (activeAudio) {
+                                    const audio = document.getElementById(activeAudio);
+                                    if (audio) {
+                                        audio.pause();
+                                        audio.currentTime = 0;
+                                    }
+                                }
+                                
+                                // Play corresponding audio
+                                if (audioId) {
+                                    const audio = document.getElementById(audioId);
+                                    if (audio) {
+                                        audio.play().catch(error => {
+                                            console.error("Audio playback error:", error);
+                                        });
+                                        activeAudio = audioId;
+                                    }
+                                }
                                 
                                 // Position the panel immediately
                                 updatePanelPositions();
                             }
-                            
-                            // Play corresponding audio
-                            if (audioId) {
-                                const audio = document.getElementById(audioId);
-                                if (audio) {
-                                    audio.play().catch(error => {
-                                        console.error("Audio playback error:", error);
-                                    });
-                                    activeAudio = audioId;
-                                }
-                            }
                         }
+                        
+                        e.stopPropagation();
                     });
                 });
             }
+            
+            // Override A-Frame's click handler to prevent audio restarts
+            const scene = document.querySelector('a-scene');
+            scene.addEventListener('loaded', function() {
+                const canvas = scene.canvas;
+                
+                // Capture the raycaster component to monitor movements
+                const camera = document.querySelector('[camera]');
+                if (camera && camera.components.raycaster) {
+                    // Create a function to detect camera movement
+                    const originalTick = camera.components.raycaster.tick;
+                    camera.components.raycaster.tick = function() {
+                        // Call the original tick function
+                        originalTick.apply(this, arguments);
+                    };
+                }
+            });
+            
+            // Define the vertical offset for panels (increased for more space)
+            const PANEL_OFFSET = 60; // Increased from 30 to 60px
             
             // Function to update panel positions based on hotspot positions
             function updatePanelPositions() {
@@ -628,10 +705,10 @@
                         const x = (vector.x + 1) / 2 * width;
                         const y = (-vector.y + 1) / 2 * height;
                         
-                        // Position panel below hotspot
+                        // Position panel below hotspot with increased offset
                         panel.style.position = 'absolute';
                         panel.style.left = x + 'px';
-                        panel.style.top = (y + 30) + 'px'; // 30px below hotspot
+                        panel.style.top = (y + PANEL_OFFSET) + 'px'; 
                         panel.style.transform = 'translate(-50%, 0)';
                     }
                 }
@@ -645,6 +722,16 @@
                         panel.style.display = 'none';
                         if (activePanel === panel.id) {
                             activePanel = null;
+                            
+                            // Stop the audio when closing the panel
+                            if (activeAudio) {
+                                const audio = document.getElementById(activeAudio);
+                                if (audio) {
+                                    audio.pause();
+                                    audio.currentTime = 0;
+                                }
+                                activeAudio = null;
+                            }
                         }
                     }
                     e.stopPropagation();
@@ -658,7 +745,18 @@
                     panels.forEach(panel => {
                         panel.style.display = 'none';
                     });
+                    
+                    // Stop audio when closing panels
+                    if (activeAudio) {
+                        const audio = document.getElementById(activeAudio);
+                        if (audio) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                        }
+                    }
+                    
                     activePanel = null;
+                    activeAudio = null;
                 }
             });
             
