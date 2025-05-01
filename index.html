@@ -229,11 +229,6 @@
         .hotspot-wrapper {
             position: relative;
         }
-        
-        /* Class to indicate that cursor shouldn't be raycasting */
-        .no-raycast .a-cursor {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -241,19 +236,18 @@
     <div class="camera-container">
         <video id="camera-feed" autoplay playsinline muted></video>
     </div>
-
+    
     <!-- Flying effects container (independent from image) -->
-        <div id="flyingEffects" class="flying-effects-container"></div>
-        
+    <div id="flyingEffects" class="flying-effects-container"></div>
+
     <!-- A-Frame Scene (without AR tracking) -->
     <div class="a-frame-container">
-        <a-scene embedded transparent="true" vr-mode-ui="enabled: false">
-            <!-- Custom cursor for interaction - using separate raycaster component for better control -->
-            <a-entity id="camera" camera look-controls="pointerLockEnabled: false" wasd-controls="enabled: false" position="0 1.6 0">
-                <a-entity id="cursor" cursor="fuse: false" position="0 0 -1"
+        <a-scene embedded transparent="true" vr-mode-ui="enabled: false" cursor="rayOrigin: mouse">
+            <!-- Custom cursor for interaction -->
+            <a-entity camera look-controls="pointerLockEnabled: false" wasd-controls="enabled: false" position="0 1.6 0">
+                <a-entity cursor="fuse: false" position="0 0 -1"
                           geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                          material="color: white; shader: flat" 
-                          raycaster="objects: .clickable; interval: 100"></a-entity>
+                          material="color: white; shader: flat" raycaster="objects: .clickable"></a-entity>
             </a-entity>
             
             <!-- This entity will hold our image -->
@@ -299,44 +293,42 @@
         </a-scene>
     </div>
 
-    <!-- Audio elements with custom controls -->
-    <div style="display: none;">
-        <audio id="audio1" src="assets/info1.mp3" preload="auto" data-playing="false"></audio>
-        <audio id="audio2" src="assets/info2.mp3" preload="auto" data-playing="false"></audio>
-        <audio id="audio3" src="assets/info4.mp3" preload="auto" data-playing="false"></audio>
-        <audio id="audio4" src="assets/info3.mp3" preload="auto" data-playing="false"></audio>
-            </div>
+    <!-- Audio elements -->
+    <audio id="audio1" src="assets/info1.mp3" preload="auto"></audio>
+    <audio id="audio2" src="assets/info2.mp3" preload="auto"></audio>
+    <audio id="audio3" src="assets/info4.mp3" preload="auto"></audio>
+    <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
     
     <!-- Info panels outside of A-Frame -->
     <div id="aframe-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15;">
         <div id="panel1" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
-                </div>
-            </div>
-            
-        <div id="panel2" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
-                </div>
-            </div>
-            
-        <div id="panel3" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
-                </div>
-            </div>
-            
-        <div id="panel4" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
-                </div>
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
             </div>
         </div>
+        
+        <div id="panel2" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+            </div>
+        </div>
+        
+        <div id="panel3" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+            </div>
+        </div>
+        
+        <div id="panel4" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+            </div>
+        </div>
+    </div>
     
     <!-- Controls -->
     <div class="controls">
@@ -439,12 +431,10 @@
                 }
             }, 5000);
             
-            // Get important elements
-            const scene = document.querySelector('a-scene');
+            // Get image container and panels
             const imageContainer = document.getElementById('chateau-image-container');
             const panels = document.querySelectorAll('.info-panel');
             const closeBtns = document.querySelectorAll('.close-btn');
-            const cursor = document.getElementById('cursor');
             
             // Variables for positioning
             let currentScale = 1;
@@ -456,108 +446,12 @@
                 z: -3
             };
             
-            // Audio controller - completely independent of A-Frame events
-            const AudioController = {
-                currentAudio: null,
-                currentPanel: null,
-                lockAudio: false, // Lock to prevent restarts during movements
-                lastInteractionTime: 0,
-                
-                playAudio: function(audioId, panelId) {
-                    // Safety check - only allow playback if not locked and enough time has passed
-                    const now = Date.now();
-                    if (this.lockAudio || (now - this.lastInteractionTime < 500)) {
-                        return false;
-                    }
-                    
-                    this.lastInteractionTime = now;
-                    
-                    // If we already have an audio playing
-                    if (this.currentAudio) {
-                        const prevAudio = document.getElementById(this.currentAudio);
-                        if (prevAudio) {
-                            prevAudio.pause();
-                            prevAudio.currentTime = 0;
-                            prevAudio.dataset.playing = "false";
-                        }
-                    }
-                    
-                    // If the same panel is clicked again, just stop audio and hide panel
-                    if (this.currentPanel === panelId) {
-                        this.currentAudio = null;
-                        this.currentPanel = null;
-                        const panel = document.getElementById(panelId);
-                        if (panel) panel.style.display = 'none';
-                        return false;
-                    }
-                    
-                    // Play the new audio
-                    const audio = document.getElementById(audioId);
-                    if (audio) {
-                        audio.currentTime = 0;
-                        audio.play().catch(error => {
-                            console.error("Audio playback error:", error);
-                        });
-                        audio.dataset.playing = "true";
-                        this.currentAudio = audioId;
-                        this.currentPanel = panelId;
-                        
-                        // Show panel
-                        const panel = document.getElementById(panelId);
-                        if (panel) {
-                            // Hide all other panels
-                            panels.forEach(p => {
-                                if (p.id !== panelId) p.style.display = 'none';
-                            });
-                            panel.style.display = 'block';
-                            updatePanelPositions();
-                        }
-                        
-                        return true;
-                    }
-                    
-                    return false;
-                },
-                
-                stopAudio: function() {
-                    if (this.currentAudio) {
-                        const audio = document.getElementById(this.currentAudio);
-                        if (audio) {
-                            audio.pause();
-                            audio.currentTime = 0;
-                            audio.dataset.playing = "false";
-                        }
-                        this.currentAudio = null;
-                        this.currentPanel = null;
-                    }
-                    
-                    // Hide all panels
-                    panels.forEach(panel => {
-                        panel.style.display = 'none';
-                    });
-                },
-                
-                lock: function() {
-                    this.lockAudio = true;
-                },
-                
-                unlock: function() {
-                    this.lockAudio = false;
-                }
-            };
+            // Track active panel and audio directly with the DOM elements
+            let activePanelElement = null;
+            let activeAudioElement = null;
             
-            // Disable raycaster during movement
-            function disableRaycaster() {
-                cursor.setAttribute('raycaster', 'enabled', false);
-                AudioController.lock();
-            }
-            
-            function enableRaycaster() {
-                setTimeout(() => {
-                    cursor.setAttribute('raycaster', 'enabled', true);
-                    AudioController.unlock();
-                }, 300); // Buffer time before re-enabling interactions
-            }
+            // This variable will track the time of the last click to prevent double-clicks
+            let lastClickTime = 0;
             
             // Zoom controls
             const zoomIn = document.getElementById('zoom-in');
@@ -565,19 +459,15 @@
             
             zoomIn.addEventListener('click', function() {
                 if (currentScale < maxScale) {
-                    disableRaycaster();
                     currentScale += 0.25;
                     updateTransform();
-                    enableRaycaster();
                 }
             });
             
             zoomOut.addEventListener('click', function() {
                 if (currentScale > minScale) {
-                    disableRaycaster();
                     currentScale -= 0.25;
                     updateTransform();
-                    enableRaycaster();
                 }
             });
             
@@ -585,53 +475,39 @@
             const moveStep = 0.3;
             
             document.getElementById('move-up').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.y += moveStep;
                 updateTransform();
-                enableRaycaster();
             });
             
             document.getElementById('move-down').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.y -= moveStep;
                 updateTransform();
-                enableRaycaster();
             });
             
             document.getElementById('move-left').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.x -= moveStep;
                 updateTransform();
-                enableRaycaster();
             });
             
             document.getElementById('move-right').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.x += moveStep;
                 updateTransform();
-                enableRaycaster();
             });
             
             document.getElementById('move-forward').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.z += moveStep;
                 updateTransform();
-                enableRaycaster();
             });
             
             document.getElementById('move-backward').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.z -= moveStep;
                 updateTransform();
-                enableRaycaster();
             });
             
             document.getElementById('move-center').addEventListener('click', function() {
-                disableRaycaster();
                 currentPosition.x = 0;
                 currentPosition.y = 1.6;
                 updateTransform();
-                enableRaycaster();
             });
             
             // Function to update transform
@@ -639,15 +515,14 @@
                 imageContainer.setAttribute('position', `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`);
                 imageContainer.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
                 
-                // Only update panel positions if there's an active panel
-                if (AudioController.currentPanel) {
+                // Only update panel positions, don't affect audio
+                if (activePanelElement) {
                     requestAnimationFrame(updatePanelPositions);
                 }
             }
             
             // Reset position button
             document.getElementById('reset-position').addEventListener('click', function() {
-                disableRaycaster();
                 currentScale = 1;
                 currentPosition = {
                     x: 0,
@@ -655,79 +530,168 @@
                     z: -3
                 };
                 updateTransform();
-                enableRaycaster();
             });
             
-            // Store hotspot to panel relationships for positioning
+            // Reference to store hotspot to panel mapping
             const hotspotPanelMap = {};
             
-            // Set up custom interaction system
-            function setupInteraction() {
-                // Add our own manual click handlers to hotspots
+            // Make the A-Frame scene transparent
+            const scene = document.querySelector('a-scene');
+            scene.addEventListener('loaded', function() {
+                // Make the A-Frame canvas transparent
+                const canvas = document.querySelector('canvas.a-canvas');
+                if (canvas) {
+                    canvas.style.background = 'transparent';
+                }
+                
+                // Setup hotspot interactions AFTER the scene is fully loaded
+                setupHotspotInteractions();
+            });
+            
+            // Setup hotspot interactions
+            function setupHotspotInteractions() {
+                // Get all hotspots
                 const hotspots = document.querySelectorAll('.hotspot');
                 
+                // First, build the mapping of hotspot wrappers to panels
                 hotspots.forEach(hotspot => {
                     const panelId = hotspot.getAttribute('data-info-id');
-                    const audioId = hotspot.getAttribute('data-audio-id');
-                    
-                    // Store the wrapper for this hotspot
-                    const wrapper = hotspot.closest('.hotspot-wrapper');
-                    if (wrapper && panelId) {
-                        hotspotPanelMap[panelId] = wrapper;
-                    }
-                    
-                    // Create our own custom click listener
-                    // We'll completely bypass A-Frame's event system 
-                    hotspot.addEventListener('click', function(e) {
-                        // If raycasting is disabled or audio is locked, ignore clicks
-                        if (cursor.getAttribute('raycaster').enabled === false || AudioController.lockAudio) {
-                            return;
+                    if (panelId) {
+                        const wrapper = hotspot.closest('.hotspot-wrapper');
+                        if (wrapper) {
+                            hotspotPanelMap[panelId] = wrapper;
                         }
-                        
-                        // Play audio using our controller
-                        AudioController.playAudio(audioId, panelId);
-                        e.stopPropagation();
-                    }, true); // Use capture to get the event before A-Frame
+                    }
                 });
                 
-                // Completely override any original click behavior
-                scene.addEventListener('click', function(e) {
-                    // If clicking on a hotspot, let that handler take care of it
-                    if (e.target.classList.contains('hotspot') || e.target.closest('.hotspot')) {
+                // Create completely custom click handling for hotspots
+                // to avoid any A-Frame interference
+                document.querySelector('a-scene').addEventListener('click', function(event) {
+                    // Debounce clicks to prevent double-firing
+                    const now = Date.now();
+                    if (now - lastClickTime < 300) {
+                        return;
+                    }
+                    lastClickTime = now;
+                    
+                    // Get the raycaster component
+                    const cursor = document.querySelector('[cursor]');
+                    if (!cursor || !cursor.components || !cursor.components.raycaster) {
                         return;
                     }
                     
-                    // If clicking elsewhere, stop any audio and hide panels
-                    // But only if not clicking UI elements
-                    if (!e.target.closest('.info-panel') && !e.target.closest('button')) {
-                        AudioController.stopAudio();
+                    // Get the intersected elements
+                    const intersectedEls = cursor.components.raycaster.intersectedEls;
+                    if (!intersectedEls.length) {
+                        return;
                     }
-                }, true); // Use capture
+                    
+                    // Check if we clicked on a hotspot
+                    let clickedHotspot = null;
+                    for (let i = 0; i < intersectedEls.length; i++) {
+                        const el = intersectedEls[i];
+                        if (el.classList.contains('hotspot')) {
+                            clickedHotspot = el;
+                            break;
+                        }
+                    }
+                    
+                    if (clickedHotspot) {
+                        handleHotspotClick(clickedHotspot);
+                        event.stopPropagation();
+                    } else {
+                        // If clicked elsewhere, close panels
+                        closeAllPanels();
+                    }
+                });
             }
             
-            // Define the vertical offset for panels (increased for more space)
+            // Handle hotspot click
+            function handleHotspotClick(hotspot) {
+                const panelId = hotspot.getAttribute('data-info-id');
+                const audioId = hotspot.getAttribute('data-audio-id');
+                
+                const panel = document.getElementById(panelId);
+                const audio = document.getElementById(audioId);
+                
+                // If we're clicking the currently active hotspot
+                if (panel === activePanelElement) {
+                    // Close the panel and stop audio
+                    panel.style.display = 'none';
+                    activePanelElement = null;
+                    
+                    if (activeAudioElement) {
+                        activeAudioElement.pause();
+                        activeAudioElement.currentTime = 0;
+                        activeAudioElement = null;
+                    }
+                } else {
+                    // Close any currently open panel
+                    if (activePanelElement) {
+                        activePanelElement.style.display = 'none';
+                    }
+                    
+                    // Stop any currently playing audio
+                    if (activeAudioElement && activeAudioElement !== audio) {
+                        activeAudioElement.pause();
+                        activeAudioElement.currentTime = 0;
+                    }
+                    
+                    // Show the new panel
+                    if (panel) {
+                        panel.style.display = 'block';
+                        activePanelElement = panel;
+                        updatePanelPositions();
+                    }
+                    
+                    // Play the new audio ONLY if not already playing
+                    if (audio && (!activeAudioElement || activeAudioElement !== audio)) {
+                        audio.currentTime = 0;
+                        audio.play().catch(error => {
+                            console.error("Audio playback error:", error);
+                        });
+                        activeAudioElement = audio;
+                    }
+                }
+            }
+            
+            // Close all panels and stop audio
+            function closeAllPanels() {
+                panels.forEach(panel => {
+                    panel.style.display = 'none';
+                });
+                
+                if (activeAudioElement) {
+                    activeAudioElement.pause();
+                    activeAudioElement.currentTime = 0;
+                    activeAudioElement = null;
+                }
+                
+                activePanelElement = null;
+            }
+            
+            // Define the vertical offset for panels
             const PANEL_OFFSET = 60;
             
             // Function to update panel positions based on hotspot positions
             function updatePanelPositions() {
-                const camera = document.getElementById('camera');
+                if (!activePanelElement) return;
                 
-                // If no camera, exit early
-                if (!camera || !scene.canvas) return;
-                
-                const panelId = AudioController.currentPanel;
-                if (!panelId) return;
-                
-                const panel = document.getElementById(panelId);
+                const panelId = activePanelElement.id;
                 const wrapper = hotspotPanelMap[panelId];
                 
-                if (panel && panel.style.display === 'block' && wrapper) {
+                if (wrapper) {
                     // Get world position of hotspot wrapper
                     const worldPos = new THREE.Vector3();
                     wrapper.object3D.getWorldPosition(worldPos);
                     
+                    // Get the camera and canvas
+                    const camera = document.querySelector('[camera]');
+                    const canvas = document.querySelector('canvas.a-canvas');
+                    
+                    if (!camera || !canvas) return;
+                    
                     // Convert to screen coordinates
-                    const canvas = scene.canvas;
                     const width = canvas.clientWidth;
                     const height = canvas.clientHeight;
                     
@@ -738,61 +702,39 @@
                     const x = (vector.x + 1) / 2 * width;
                     const y = (-vector.y + 1) / 2 * height;
                     
-                    // Position panel below hotspot with increased offset
-                    panel.style.position = 'absolute';
-                    panel.style.left = x + 'px';
-                    panel.style.top = (y + PANEL_OFFSET) + 'px'; 
-                    panel.style.transform = 'translate(-50%, 0)';
+                    // Position panel below hotspot with offset
+                    activePanelElement.style.position = 'absolute';
+                    activePanelElement.style.left = x + 'px';
+                    activePanelElement.style.top = (y + PANEL_OFFSET) + 'px';
+                    activePanelElement.style.transform = 'translate(-50%, 0)';
                 }
             }
             
             // Close info panel when clicking the close button
             closeBtns.forEach((btn) => {
                 btn.addEventListener('click', function(e) {
-                    AudioController.stopAudio();
+                    const panel = this.closest('.info-panel');
+                    if (panel) {
+                        panel.style.display = 'none';
+                        
+                        if (panel === activePanelElement) {
+                            activePanelElement = null;
+                            
+                            // Stop the audio when closing the panel
+                            if (activeAudioElement) {
+                                activeAudioElement.pause();
+                                activeAudioElement.currentTime = 0;
+                                activeAudioElement = null;
+                            }
+                        }
+                    }
                     e.stopPropagation();
                 });
             });
             
-            // Disable look-controls during camera movement to prevent interactions
-            let lookControlsEnabled = true;
-            const camera = document.getElementById('camera');
-            
-            // When the user starts dragging/moving the view
-            scene.addEventListener('mousedown', function() {
-                disableRaycaster();
-            });
-            
-            scene.addEventListener('mouseup', function() {
-                enableRaycaster();
-            });
-            
-            // For touch devices
-            scene.addEventListener('touchstart', function() {
-                disableRaycaster();
-            });
-            
-            scene.addEventListener('touchend', function() {
-                enableRaycaster();
-            });
-            
-            // Wait for A-Frame to be ready
-            scene.addEventListener('loaded', function() {
-                // Make the A-Frame canvas transparent
-                const canvas = scene.canvas;
-                if (canvas) {
-                    canvas.style.background = 'transparent';
-                }
-                
-                setupInteraction();
-                
-                // Set initial panel positions
-                setTimeout(updatePanelPositions, 500);
-            });
-            
-            // Continuously update panel positions for smooth movement
+            // Continuously update panel positions while active
             function animatePanels() {
-                if (AudioController.currentPanel) {
+                if (activePanelElement) {
                     updatePanelPositions();
                 }
                 requestAnimationFrame(animatePanels);
