@@ -81,20 +81,26 @@
         .info-panel {
             display: none;
             position: absolute;
-            width: 30%;
+            width: 40%;
+            max-width: 320px;
+            min-width: 250px;
             background-color: white;
             border-radius: 20px;
-            padding: 15px;
+            padding: 15px 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 10;
             transform: translate(-50%, 0);
             min-height: 120px;
-            max-height: 200px;
+            max-height: 220px;
         }
         
         .info-content {
             position: relative;
             text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .close-btn {
@@ -109,9 +115,17 @@
         .info-text {
             margin-top: 10px;
             font-family: 'Libre Baskerville', serif;
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1.5;
             text-align: center;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        
+        .info-text b {
+            font-size: 16px;
+            display: block;
+            margin-bottom: 6px;
         }
         
         .controls {
@@ -229,6 +243,13 @@
         .hotspot-wrapper {
             position: relative;
         }
+        
+        @media (max-width: 768px) {
+            .info-panel {
+                width: 60%;
+                min-width: 200px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -238,7 +259,7 @@
     </div>
 
     <!-- Flying effects container (independent from image) -->
-        <div id="flyingEffects" class="flying-effects-container"></div>
+    <div id="flyingEffects" class="flying-effects-container"></div>
 
     <!-- A-Frame Scene (without AR tracking) -->
     <div class="a-frame-container">
@@ -302,33 +323,33 @@
     <!-- Info panels outside of A-Frame -->
     <div id="aframe-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15;">
         <div id="panel1" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
-                </div>
-            </div>
-            
-        <div id="panel2" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
-                </div>
-            </div>
-            
-        <div id="panel3" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
-                </div>
-            </div>
-            
-        <div id="panel4" class="info-panel" style="pointer-events: auto;">
-                <div class="info-content">
-                    <span class="close-btn">&times;</span>
-                    <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
-                </div>
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
             </div>
         </div>
+        
+        <div id="panel2" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+            </div>
+        </div>
+        
+        <div id="panel3" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+            </div>
+        </div>
+        
+        <div id="panel4" class="info-panel" style="pointer-events: auto;">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+            </div>
+        </div>
+    </div>
     
     <!-- Controls -->
     <div class="controls">
@@ -506,7 +527,6 @@
             let lastHotspotClick = 0;
             
             // Set up a frame checker to detect camera movement
-            // This is separate from our manual movement controls
             function setupCameraMovementDetection() {
                 const camera = document.querySelector('[camera]');
                 if (!camera) return;
@@ -622,21 +642,19 @@
             // Store hotspot to panel relationships for positioning
             const hotspotPanelMap = {};
             
-            // Override A-Frame's click handler to completely decuople from our audio control
+            // Override A-Frame's click handler
             function setupCustomClickHandling() {
                 // Get the A-Frame canvas element
                 const canvas = document.querySelector('canvas.a-canvas');
                 if (!canvas) return;
                 
-                // Create our custom click handler that will determine if it's a real click
+                // Create our custom click handler
                 canvas.addEventListener('click', function(e) {
                     // Ignore clicks if camera is moving
                     if (cameraMoving) {
                         e.stopPropagation();
                         return;
                     }
-                    
-                    // Allow the click to proceed to A-Frame
                 }, true);
             }
             
@@ -667,11 +685,6 @@
                     if (wrapper && panelId) {
                         hotspotPanelMap[panelId] = wrapper;
                     }
-                    
-                    // Disable A-Frame's raycasting for this element
-                    // to stop it from triggering our hotspots
-                    const scene = document.querySelector('a-scene');
-                    const raycaster = scene.querySelector('[raycaster]');
                     
                     // Completely replace hotspot click handling
                     hotspot.addEventListener('click', function(e) {
@@ -711,14 +724,14 @@
                                 // Position the panel immediately
                                 updatePanelPositions();
                             }
-                    }
-                    
-                    e.stopPropagation();
+                        }
+                        
+                        e.stopPropagation();
+                    });
                 });
-            });
             }
             
-            // Define the vertical offset for panels (increased for more space)
+            // Define the vertical offset for panels
             const PANEL_OFFSET = 60; // 60px space below hotspots
             
             // Function to update panel positions based on hotspot positions
@@ -750,7 +763,7 @@
                         const x = (vector.x + 1) / 2 * width;
                         const y = (-vector.y + 1) / 2 * height;
                         
-                        // Position panel below hotspot with increased offset
+                        // Position panel below hotspot with offset
                         panel.style.position = 'absolute';
                         panel.style.left = x + 'px';
                         panel.style.top = (y + PANEL_OFFSET) + 'px'; 
@@ -779,9 +792,9 @@
             document.addEventListener('click', function(e) {
                 // Don't close if clicking inside a panel, an A-Frame entity, or a button
                 if (!e.target.closest('.info-panel') && !e.target.closest('a-entity') && !e.target.closest('button')) {
-                panels.forEach(panel => {
-                    panel.style.display = 'none';
-                });
+                    panels.forEach(panel => {
+                        panel.style.display = 'none';
+                    });
                     
                     // Stop all audio through our controller
                     AudioController.stopAll();
