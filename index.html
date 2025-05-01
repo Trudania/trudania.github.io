@@ -81,26 +81,22 @@
         .info-panel {
             display: none;
             position: absolute;
-            width: 40%;
-            max-width: 320px;
-            min-width: 250px;
+            width: 45%;
+            max-width: 350px;
             background-color: white;
             border-radius: 20px;
-            padding: 15px 20px;
+            padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 10;
             transform: translate(-50%, 0);
             min-height: 120px;
-            max-height: 220px;
+            box-sizing: border-box;
         }
         
         .info-content {
             position: relative;
             text-align: center;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            width: 100%;
         }
         
         .close-btn {
@@ -118,14 +114,8 @@
             font-size: 14px;
             line-height: 1.5;
             text-align: center;
-            overflow-wrap: break-word;
+            padding: 0 5px;
             word-wrap: break-word;
-        }
-        
-        .info-text b {
-            font-size: 16px;
-            display: block;
-            margin-bottom: 6px;
         }
         
         .controls {
@@ -246,8 +236,8 @@
         
         @media (max-width: 768px) {
             .info-panel {
-                width: 60%;
-                min-width: 200px;
+                width: 80%;
+                max-width: none;
             }
         }
     </style>
@@ -281,7 +271,7 @@
                 <!-- Hotspots as entities -->
                 <a-entity id="hotspot1-wrapper" class="hotspot-wrapper" position="-0.75 -0.3 0.01">
                     <a-entity id="hotspot1" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel1" data-audio-src="assets/info1.mp3">
+                              data-info-id="panel1" data-audio-id="audio1">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -289,7 +279,7 @@
                 
                 <a-entity id="hotspot2-wrapper" class="hotspot-wrapper" position="-0.5 0.3 0.01">
                     <a-entity id="hotspot2" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel2" data-audio-src="assets/info2.mp3">
+                              data-info-id="panel2" data-audio-id="audio2">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -297,7 +287,7 @@
                 
                 <a-entity id="hotspot3-wrapper" class="hotspot-wrapper" position="0.75 -0.3 0.01">
                     <a-entity id="hotspot3" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel3" data-audio-src="assets/info4.mp3">
+                              data-info-id="panel3" data-audio-id="audio3">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -305,7 +295,7 @@
                 
                 <a-entity id="hotspot4-wrapper" class="hotspot-wrapper" position="0.3 -0.3 0.01">
                     <a-entity id="hotspot4" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel4" data-audio-src="assets/info3.mp3">
+                              data-info-id="panel4" data-audio-id="audio4">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -314,39 +304,42 @@
         </a-scene>
     </div>
         
-    <!-- SINGLE audio element for all audio playback -->
-    <audio id="main-audio" preload="auto"></audio>
-    
+        <!-- Audio elements -->
+        <audio id="audio1" src="assets/info1.mp3" preload="auto"></audio>
+        <audio id="audio2" src="assets/info2.mp3" preload="auto"></audio>
+        <audio id="audio3" src="assets/info4.mp3" preload="auto"></audio>
+        <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
+        
     <!-- Info panels outside of A-Frame -->
     <div id="aframe-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15;">
         <div id="panel1" class="info-panel" style="pointer-events: auto;">
-            <div class="info-content">
-                <span class="close-btn">&times;</span>
-                <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
+                </div>
             </div>
-        </div>
-        
+            
         <div id="panel2" class="info-panel" style="pointer-events: auto;">
-            <div class="info-content">
-                <span class="close-btn">&times;</span>
-                <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+                </div>
             </div>
-        </div>
-        
+            
         <div id="panel3" class="info-panel" style="pointer-events: auto;">
-            <div class="info-content">
-                <span class="close-btn">&times;</span>
-                <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+                </div>
             </div>
-        </div>
-        
+            
         <div id="panel4" class="info-panel" style="pointer-events: auto;">
-            <div class="info-content">
-                <span class="close-btn">&times;</span>
-                <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+                <div class="info-content">
+                    <span class="close-btn">&times;</span>
+                    <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+                </div>
             </div>
         </div>
-    </div>
     
     <!-- Controls -->
     <div class="controls">
@@ -464,93 +457,67 @@
                 z: -3
             };
             
-            // Track active panel
+            // Track active panel and audio
             let activePanel = null;
             
-            // COMPLETELY NEW AUDIO SYSTEM using a single audio element
-            const SingleAudioPlayer = {
-                audioElement: document.getElementById('main-audio'),
-                currentSource: null,
-                isPlaying: false,
-                isChanging: false,
-                
-                init: function() {
-                    // Set up event listeners
-                    this.audioElement.addEventListener('ended', () => {
-                        this.isPlaying = false;
-                        this.currentSource = null;
-                    });
-                    
-                    this.audioElement.addEventListener('error', (e) => {
-                        console.error('Audio error:', e);
-                        this.isPlaying = false;
-                        this.isChanging = false;
-                    });
-                    
-                    this.audioElement.addEventListener('canplaythrough', () => {
-                        if (this.isChanging) {
-                            this.isChanging = false;
-                            this.play();
-                        }
-                    });
+            // Create dedicated audio controller
+            const AudioController = {
+                currentAudio: null,
+                audios: {
+                    audio1: document.getElementById('audio1'),
+                    audio2: document.getElementById('audio2'),
+                    audio3: document.getElementById('audio3'),
+                    audio4: document.getElementById('audio4')
                 },
                 
-                setSource: function(src) {
-                    // If already playing this source, do nothing
-                    if (this.currentSource === src && this.isPlaying) {
+                // Play a specific audio
+                play: function(audioId) {
+                    // If same audio is already playing, do nothing
+                    if (this.currentAudio === audioId && !this.audios[audioId].paused) {
                         return;
                     }
                     
-                    // Stop current audio
-                    this.stop();
+                    // Stop any currently playing audio
+                    this.stopAll();
                     
-                    // Set flag to indicate we're changing sources
-                    this.isChanging = true;
-                    
-                    // Set timeout to prevent quick source changes
-                    setTimeout(() => {
-                        // Update the source
-                        this.audioElement.src = src;
-                        this.currentSource = src;
-                        
-                        // Load the new audio
-                        this.audioElement.load();
-                    }, 100);
-                },
-                
-                play: function() {
-                    if (this.isChanging) return;
-                    
-                    const playPromise = this.audioElement.play();
-                    
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            this.isPlaying = true;
-                        }).catch(error => {
-                            console.error("Audio play error:", error);
-                            this.isPlaying = false;
+                    // Play the new audio
+                    if (this.audios[audioId]) {
+                        this.audios[audioId].currentTime = 0;
+                        this.audios[audioId].play().catch(error => {
+                            console.error("Audio playback error:", error);
                         });
-                    } else {
-                        this.isPlaying = true;
+                        this.currentAudio = audioId;
                     }
                 },
                 
-                stop: function() {
-                    this.audioElement.pause();
-                    this.audioElement.currentTime = 0;
-                    this.isPlaying = false;
+                // Stop a specific audio
+                stop: function(audioId) {
+                    if (this.audios[audioId]) {
+                        this.audios[audioId].pause();
+                        this.audios[audioId].currentTime = 0;
+                        if (this.currentAudio === audioId) {
+                            this.currentAudio = null;
+                        }
+                    }
+                },
+                
+                // Stop all audio
+                stopAll: function() {
+                    for (const audioId in this.audios) {
+                        this.audios[audioId].pause();
+                        this.audios[audioId].currentTime = 0;
+                    }
+                    this.currentAudio = null;
                 }
             };
-            
-            // Initialize the audio player
-            SingleAudioPlayer.init();
-            
+                    
             // Flag to prevent interaction during camera movement
             let cameraMoving = false;
             let lastCameraPosition = new THREE.Vector3();
             let lastHotspotClick = 0;
             
             // Set up a frame checker to detect camera movement
+            // This is separate from our manual movement controls
             function setupCameraMovementDetection() {
                 const camera = document.querySelector('[camera]');
                 if (!camera) return;
@@ -666,9 +633,37 @@
             // Store hotspot to panel relationships for positioning
             const hotspotPanelMap = {};
             
-            // STRICT CLICK LOCKOUT to prevent any possibility of multiple clicks
-            let clickLocked = false;
-            const CLICK_LOCKOUT_TIME = 500; // ms
+            // Override A-Frame's click handler to completely decuople from our audio control
+            function setupCustomClickHandling() {
+                // Get the A-Frame canvas element
+                const canvas = document.querySelector('canvas.a-canvas');
+                if (!canvas) return;
+                    
+                // Create our custom click handler that will determine if it's a real click
+                canvas.addEventListener('click', function(e) {
+                    // Ignore clicks if camera is moving
+                    if (cameraMoving) {
+                        e.stopPropagation();
+                        return;
+                    }
+                    
+                    // Allow the click to proceed to A-Frame
+                }, true);
+            }
+            
+            // Set up interaction
+            // Wait for A-Frame to be ready
+            document.querySelector('a-scene').addEventListener('loaded', function() {
+                setupCustomClickHandling();
+                setupCameraMovementDetection();
+                setupHotspotInteraction();
+                    
+                // Make the A-Frame canvas transparent
+                const canvas = document.querySelector('canvas.a-canvas');
+                if (canvas) {
+                    canvas.style.background = 'transparent';
+                }
+            });
             
             function setupHotspotInteraction() {
                 // Add click event listeners to hotspots
@@ -676,7 +671,7 @@
                 
                 hotspots.forEach(hotspot => {
                     const panelId = hotspot.getAttribute('data-info-id');
-                    const audioSrc = hotspot.getAttribute('data-audio-src');
+                    const audioId = hotspot.getAttribute('data-audio-id');
                     
                     // Store the wrapper for this hotspot
                     const wrapper = hotspot.closest('.hotspot-wrapper');
@@ -684,22 +679,20 @@
                         hotspotPanelMap[panelId] = wrapper;
                     }
                     
+                    // Disable A-Frame's raycasting for this element
+                    // to stop it from triggering our hotspots
+                    const scene = document.querySelector('a-scene');
+                    const raycaster = scene.querySelector('[raycaster]');
+                    
                     // Completely replace hotspot click handling
                     hotspot.addEventListener('click', function(e) {
-                        // STRICT lockout check
-                        if (clickLocked || cameraMoving) {
+                        // Don't process clicks if camera is moving or time since last click is too short
+                        const now = Date.now();
+                        if (cameraMoving || (now - lastHotspotClick < 500)) {
                             e.stopPropagation();
                             return;
                         }
-                        
-                        // Set click lockout
-                        clickLocked = true;
-                        setTimeout(() => {
-                            clickLocked = false;
-                        }, CLICK_LOCKOUT_TIME);
-                        
-                        // Store timestamp of click
-                        lastHotspotClick = Date.now();
+                        lastHotspotClick = now;
                         
                         // Hide all panels except the active one
                         panels.forEach(panel => {
@@ -715,28 +708,28 @@
                                 // If already active, toggle it off
                                 panel.style.display = 'none';
                                 activePanel = null;
-                                SingleAudioPlayer.stop();
+                                AudioController.stopAll();
                             } else {
                                 // If not active, show it and play audio
                                 panel.style.display = 'block';
                                 activePanel = panelId;
                                 
-                                // Play corresponding audio
-                                if (audioSrc) {
-                                    SingleAudioPlayer.setSource(audioSrc);
+                                // Play corresponding audio through our controller
+                                if (audioId) {
+                                    AudioController.play(audioId);
                                 }
                                 
                                 // Position the panel immediately
                                 updatePanelPositions();
                             }
-                        }
-                        
-                        e.stopPropagation();
-                    });
+                    }
+                    
+                    e.stopPropagation();
                 });
+            });
             }
             
-            // Define the vertical offset for panels
+            // Define the vertical offset for panels (increased for more space)
             const PANEL_OFFSET = 60; // 60px space below hotspots
             
             // Function to update panel positions based on hotspot positions
@@ -768,7 +761,7 @@
                         const x = (vector.x + 1) / 2 * width;
                         const y = (-vector.y + 1) / 2 * height;
                         
-                        // Position panel below hotspot with offset
+                        // Position panel below hotspot with increased offset
                         panel.style.position = 'absolute';
                         panel.style.left = x + 'px';
                         panel.style.top = (y + PANEL_OFFSET) + 'px'; 
@@ -785,7 +778,8 @@
                         panel.style.display = 'none';
                         if (activePanel === panel.id) {
                             activePanel = null;
-                            SingleAudioPlayer.stop();
+                            // Stop audio through our controller
+                            AudioController.stopAll();
                         }
                     }
                     e.stopPropagation();
@@ -796,11 +790,12 @@
             document.addEventListener('click', function(e) {
                 // Don't close if clicking inside a panel, an A-Frame entity, or a button
                 if (!e.target.closest('.info-panel') && !e.target.closest('a-entity') && !e.target.closest('button')) {
-                    panels.forEach(panel => {
-                        panel.style.display = 'none';
-                    });
+                panels.forEach(panel => {
+                    panel.style.display = 'none';
+                });
                     
-                    SingleAudioPlayer.stop();
+                    // Stop all audio through our controller
+                    AudioController.stopAll();
                     activePanel = null;
                 }
             });
