@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Château de Brissac Experience</title>
+    <title>Château de Brissac Interactive Experience</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap" rel="stylesheet">
     
-    <!-- A-Frame library for 3D positioning -->
+    <!-- A-Frame for 3D positioning -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     
     <style>
@@ -16,10 +17,32 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        .camera-container {
             position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            font-family: Arial, sans-serif;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        #camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .a-frame-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
         
         .flying-effects-container {
@@ -29,7 +52,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 5;
         }
         
         .flying-effect {
@@ -58,8 +81,7 @@
         .info-panel {
             display: none;
             position: fixed;
-            width: 80%;
-            max-width: 300px;
+            width: 30%;
             background-color: white;
             border-radius: 20px;
             padding: 15px;
@@ -68,6 +90,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            min-height: 120px;
+            max-height: 200px;
         }
         
         .info-content {
@@ -77,7 +101,7 @@
         
         .close-btn {
             position: absolute;
-            top: 5px;
+            top: 0;
             right: 10px;
             font-size: 24px;
             font-weight: bold;
@@ -87,7 +111,7 @@
         .info-text {
             margin-top: 10px;
             font-family: 'Libre Baskerville', serif;
-            font-size: 14px;
+            font-size: 12px;
             line-height: 1.5;
             text-align: center;
         }
@@ -100,7 +124,7 @@
             display: flex;
             justify-content: center;
             gap: 10px;
-            z-index: 30;
+            z-index: 20;
         }
         
         .control-btn {
@@ -121,7 +145,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            z-index: 30;
+            z-index: 20;
         }
         
         .zoom-btn {
@@ -143,72 +167,115 @@
             left: 20px;
             top: 50%;
             transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 30;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 5px;
+            z-index: 20;
         }
         
         .move-btn {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
-            font-size: 24px;
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+        
+        #move-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        #move-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        #move-center {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        
+        #move-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        #move-down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        #move-forward {
+            grid-column: 1;
+            grid-row: 1;
+        }
+        
+        #move-backward {
+            grid-column: 3;
+            grid-row: 3;
+        }
     </style>
 </head>
 <body>
+    <!-- Real-time Camera Feed -->
+    <div class="camera-container">
+        <video id="camera-feed" autoplay playsinline muted></video>
+    </div>
+
     <!-- Flying effects container -->
     <div id="flyingEffects" class="flying-effects-container"></div>
 
-    <!-- A-Frame Scene without AR tracking -->
-    <a-scene embedded vr-mode-ui="enabled: false" cursor="rayOrigin: mouse">
-        <!-- Custom cursor for interaction -->
-        <a-entity camera look-controls wasd-controls position="0 1.6 0">
-            <a-entity cursor="fuse: false; fuseTimeout: 500" position="0 0 -1"
-                      geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                      material="color: white; shader: flat"></a-entity>
-        </a-entity>
-        
-        <!-- This entity will hold our image -->
-        <a-entity id="chateau-image-container" position="0 1.6 -3">
-            <!-- Main image as a plane -->
-            <a-plane id="chateau-image" src="assets/img1.png" position="0 0 0" 
-                     width="2.5" height="1.7"></a-plane>
-            
-            <!-- Hotspots as entities -->
-            <a-entity id="hotspot1" class="hotspot" position="-0.75 -0.3 0.01"
-                      data-info-id="panel1" data-audio-id="audio1">
-                <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
-                <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
+    <!-- A-Frame Scene (without AR tracking) -->
+    <div class="a-frame-container">
+        <a-scene embedded vr-mode-ui="enabled: false" cursor="rayOrigin: mouse">
+            <!-- Custom cursor for interaction -->
+            <a-entity camera look-controls="pointerLockEnabled: false" wasd-controls="enabled: false" position="0 1.6 0">
+                <a-entity cursor="fuse: false" position="0 0 -1"
+                          geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                          material="color: white; shader: flat" raycaster="objects: .clickable"></a-entity>
             </a-entity>
             
-            <a-entity id="hotspot2" class="hotspot" position="-0.5 0.3 0.01"
-                      data-info-id="panel2" data-audio-id="audio2">
-                <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
-                <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
+            <!-- This entity will hold our image -->
+            <a-entity id="chateau-image-container" position="0 1.6 -3">
+                <!-- Main image as a plane -->
+                <a-plane id="chateau-image" src="assets/img1.png" position="0 0 0" 
+                         width="2.5" height="1.7" class="clickable"></a-plane>
+                
+                <!-- Hotspots as entities -->
+                <a-entity id="hotspot1" class="hotspot clickable" position="-0.75 -0.3 0.01"
+                          data-info-id="panel1" data-audio-id="audio1">
+                    <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
+                    <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
+                </a-entity>
+                
+                <a-entity id="hotspot2" class="hotspot clickable" position="-0.5 0.3 0.01"
+                          data-info-id="panel2" data-audio-id="audio2">
+                    <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
+                    <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
+                </a-entity>
+                
+                <a-entity id="hotspot3" class="hotspot clickable" position="0.75 -0.3 0.01"
+                          data-info-id="panel3" data-audio-id="audio3">
+                    <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
+                    <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
+                </a-entity>
+                
+                <a-entity id="hotspot4" class="hotspot clickable" position="0.3 -0.3 0.01"
+                          data-info-id="panel4" data-audio-id="audio4">
+                    <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
+                    <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
+                </a-entity>
             </a-entity>
-            
-            <a-entity id="hotspot3" class="hotspot" position="0.75 -0.3 0.01"
-                      data-info-id="panel3" data-audio-id="audio3">
-                <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
-                <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
-            </a-entity>
-            
-            <a-entity id="hotspot4" class="hotspot" position="0.3 -0.3 0.01"
-                      data-info-id="panel4" data-audio-id="audio4">
-                <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
-                <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
-            </a-entity>
-        </a-entity>
-    </a-scene>
+        </a-scene>
+    </div>
 
     <!-- Audio elements -->
     <audio id="audio1" src="assets/info1.mp3" preload="auto"></audio>
@@ -216,7 +283,7 @@
     <audio id="audio3" src="assets/info4.mp3" preload="auto"></audio>
     <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
     
-    <!-- Info panels (outside AR scene, as HTML overlays) -->
+    <!-- Info panels -->
     <div class="info-panel" id="panel1">
         <div class="info-content">
             <span class="close-btn">&times;</span>
@@ -245,6 +312,7 @@
         </div>
     </div>
     
+    <!-- Controls -->
     <div class="controls">
         <button class="control-btn" id="reset-position">Reset Position</button>
     </div>
@@ -255,14 +323,31 @@
     </div>
     
     <div class="move-controls">
-        <button class="move-btn" id="move-closer">↑</button>
-        <button class="move-btn" id="move-farther">↓</button>
+        <button class="move-btn" id="move-forward">↖</button>
+        <button class="move-btn" id="move-up">↑</button>
         <button class="move-btn" id="move-left">←</button>
+        <button class="move-btn" id="move-center">•</button>
         <button class="move-btn" id="move-right">→</button>
+        <button class="move-btn" id="move-down">↓</button>
+        <button class="move-btn" id="move-backward">↘</button>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Start real-time camera
+            const video = document.getElementById('camera-feed');
+            
+            // Check if browser supports getUserMedia
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                    })
+                    .catch(function(error) {
+                        console.error("Could not access the camera: ", error);
+                    });
+            }
+            
             // Create flying effects
             const flyingEffectsContainer = document.getElementById('flyingEffects');
             
@@ -333,13 +418,15 @@
             const panels = document.querySelectorAll('.info-panel');
             const closeBtns = document.querySelectorAll('.close-btn');
             
-            // Variables for scaling and position
+            // Variables for positioning
             let currentScale = 1;
             const minScale = 0.5;
             const maxScale = 3;
-            let currentZ = -3;
-            let currentX = 0;
-            let currentY = 1.6;
+            let currentPosition = {
+                x: 0,
+                y: 1.6,
+                z: -3
+            };
             
             // Zoom controls
             const zoomIn = document.getElementById('zoom-in');
@@ -360,38 +447,58 @@
             });
             
             // Movement controls
-            document.getElementById('move-closer').addEventListener('click', function() {
-                currentZ += 0.5;
+            const moveStep = 0.3;
+            
+            document.getElementById('move-up').addEventListener('click', function() {
+                currentPosition.y += moveStep;
                 updateTransform();
             });
             
-            document.getElementById('move-farther').addEventListener('click', function() {
-                currentZ -= 0.5;
+            document.getElementById('move-down').addEventListener('click', function() {
+                currentPosition.y -= moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-left').addEventListener('click', function() {
-                currentX -= 0.5;
+                currentPosition.x -= moveStep;
                 updateTransform();
             });
             
             document.getElementById('move-right').addEventListener('click', function() {
-                currentX += 0.5;
+                currentPosition.x += moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-forward').addEventListener('click', function() {
+                currentPosition.z += moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-backward').addEventListener('click', function() {
+                currentPosition.z -= moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-center').addEventListener('click', function() {
+                currentPosition.x = 0;
+                currentPosition.y = 1.6;
                 updateTransform();
             });
             
             // Function to update transform
             function updateTransform() {
-                imageContainer.setAttribute('position', `${currentX} ${currentY} ${currentZ}`);
+                imageContainer.setAttribute('position', `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`);
                 imageContainer.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
             }
             
             // Reset position button
             document.getElementById('reset-position').addEventListener('click', function() {
                 currentScale = 1;
-                currentX = 0;
-                currentY = 1.6;
-                currentZ = -3;
+                currentPosition = {
+                    x: 0,
+                    y: 1.6,
+                    z: -3
+                };
                 updateTransform();
             });
             
@@ -450,41 +557,12 @@
             // Close all panels when clicking elsewhere
             document.addEventListener('click', function(e) {
                 // Don't close if clicking inside a panel
-                if (!e.target.closest('.info-panel') && !e.target.closest('.hotspot')) {
+                if (!e.target.closest('.info-panel') && !e.target.closest('a-entity') && !e.target.closest('button')) {
                     panels.forEach(panel => {
                         panel.style.display = 'none';
                     });
                 }
             });
-            
-            // Make the camera use device orientation if on mobile
-            if (window.DeviceOrientationEvent) {
-                // Check if we need to request permission (iOS 13+)
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    // Add a button to request permission
-                    const permissionBtn = document.createElement('button');
-                    permissionBtn.textContent = 'Enable Motion Controls';
-                    permissionBtn.classList.add('control-btn');
-                    permissionBtn.style.position = 'fixed';
-                    permissionBtn.style.top = '20px';
-                    permissionBtn.style.left = '50%';
-                    permissionBtn.style.transform = 'translateX(-50%)';
-                    permissionBtn.style.zIndex = '100';
-                    
-                    permissionBtn.addEventListener('click', function() {
-                        DeviceOrientationEvent.requestPermission()
-                            .then(response => {
-                                if (response === 'granted') {
-                                    // Permission granted, enable gyroscope
-                                    permissionBtn.style.display = 'none';
-                                }
-                            })
-                            .catch(console.error);
-                    });
-                    
-                    document.body.appendChild(permissionBtn);
-                }
-            }
         });
     </script>
 </body>
