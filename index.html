@@ -32,15 +32,6 @@
             object-fit: cover;
         }
         
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-            padding: 20px;
-            position: relative;
-            z-index: 10;
-        }
-        
         .flying-effects-container {
             position: fixed;
             top: 0;
@@ -83,17 +74,19 @@
         .image-container {
             position: absolute;
             display: inline-block;
-            max-width: 80%;
+            width: 90%; /* Make image container larger */
+            max-width: 600px; /* Limit max width */
             cursor: move;
             z-index: 10;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center;
             touch-action: none;
         }
         
         .image-container img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
             display: block;
         }
@@ -171,6 +164,32 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .zoom-controls {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 20;
+        }
+        
+        .zoom-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
@@ -236,6 +255,11 @@
     
     <div class="controls">
         <button class="control-btn" id="reset-position">Reset Position</button>
+    </div>
+    
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoom-in">+</button>
+        <button class="zoom-btn" id="zoom-out">−</button>
     </div>
     
     <script>
@@ -344,7 +368,7 @@
                 }
             });
             
-            // Make the image container draggable
+            // Make the image container draggable and zoomable
             const draggableImage = document.getElementById('draggable-image');
             let isDragging = false;
             let currentX;
@@ -353,18 +377,101 @@
             let initialY;
             let xOffset = 0;
             let yOffset = 0;
+            let scale = 1;
             
-            // Touch events
+            // Zoom controls
+            const zoomIn = document.getElementById('zoom-in');
+            const zoomOut = document.getElementById('zoom-out');
+            
+            zoomIn.addEventListener('click', function() {
+                if (scale < 3) { // Limit maximum zoom
+                    scale += 0.25;
+                    updateTransform();
+                }
+            });
+            
+            zoomOut.addEventListener('click', function() {
+                if (scale > 0.5) { // Limit minimum zoom
+                    scale -= 0.25;
+                    updateTransform();
+                }
+            });
+            
+            // Mouse wheel zoom
+            draggableImage.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const delta = Math.sign(e.deltaY) * -0.1;
+                
+                // Calculate new scale but limit it
+                const newScale = Math.max(0.5, Math.min(3, scale + delta));
+                
+                if (newScale !== scale) {
+                    scale = newScale;
+                    updateTransform();
+                }
+            });
+            
+            // Touch events for pinch zoom
+            let initialDistance = 0;
+            
+            draggableImage.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    initialDistance = getDistance(e.touches[0], e.touches[1]);
+                }
+            });
+            
+            draggableImage.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2) {
+                    const currentDistance = getDistance(e.touches[0], e.touches[1]);
+                    const pinchDelta = currentDistance - initialDistance;
+                    
+                    if (Math.abs(pinchDelta) > 10) { // Threshold to avoid jittery behavior
+                        const scaleDelta = pinchDelta > 0 ? 0.05 : -0.05;
+                        const newScale = Math.max(0.5, Math.min(3, scale + scaleDelta));
+                        
+                        if (newScale !== scale) {
+                            scale = newScale;
+                            updateTransform();
+                            initialDistance = currentDistance;
+                        }
+                    }
+                    
+                    // Prevent default to avoid page zoom
+                    e.preventDefault();
+                }
+            });
+            
+            function getDistance(touch1, touch2) {
+                const dx = touch1.clientX - touch2.clientX;
+                const dy = touch1.clientY - touch2.clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            function updateTransform() {
+                // Calculate transform based on both position and scale
+                if (xOffset === 0 && yOffset === 0) {
+                    draggableImage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                } else {
+                    draggableImage.style.transform = `translate(${xOffset}px, ${yOffset}px) scale(${scale})`;
+                }
+            }
+            
+            // Touch events for dragging
             draggableImage.addEventListener('touchstart', dragStart, false);
             draggableImage.addEventListener('touchend', dragEnd, false);
             draggableImage.addEventListener('touchmove', drag, false);
             
-            // Mouse events
+            // Mouse events for dragging
             draggableImage.addEventListener('mousedown', dragStart, false);
             document.addEventListener('mouseup', dragEnd, false);
             document.addEventListener('mousemove', drag, false);
             
             function dragStart(e) {
+                // Don't start drag if it's a multi-touch gesture (likely pinch-zoom)
+                if (e.type === 'touchstart' && e.touches.length > 1) {
+                    return;
+                }
+                
                 if (e.type === 'touchstart') {
                     initialX = e.touches[0].clientX - xOffset;
                     initialY = e.touches[0].clientY - yOffset;
@@ -399,6 +506,11 @@
             
             function drag(e) {
                 if (isDragging) {
+                    // Don't drag if it's a multi-touch gesture (likely pinch-zoom)
+                    if (e.type === 'touchmove' && e.touches.length > 1) {
+                        return;
+                    }
+                    
                     if (e.type === 'touchmove') {
                         currentX = e.touches[0].clientX - initialX;
                         currentY = e.touches[0].clientY - initialY;
@@ -410,7 +522,7 @@
                     xOffset = currentX;
                     yOffset = currentY;
                     
-                    setTranslate(currentX, currentY, draggableImage);
+                    updateTransform();
                     
                     // Prevent default behavior to avoid issues on touch devices
                     if (e.cancelable) {
@@ -419,16 +531,12 @@
                 }
             }
             
-            function setTranslate(xPos, yPos, el) {
-                el.style.transform = `translate(${xPos}px, ${yPos}px)`;
-            }
-            
             // Reset position button
             document.getElementById('reset-position').addEventListener('click', function() {
                 xOffset = 0;
                 yOffset = 0;
-                setTranslate(0, 0, draggableImage);
-                draggableImage.style.transform = 'translate(-50%, -50%)';
+                scale = 1;
+                draggableImage.style.transform = 'translate(-50%, -50%) scale(1)';
                 draggableImage.style.top = '50%';
                 draggableImage.style.left = '50%';
             });
