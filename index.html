@@ -281,7 +281,7 @@
                 <!-- Hotspots as entities -->
                 <a-entity id="hotspot1-wrapper" class="hotspot-wrapper" position="-0.75 -0.3 0.01">
                     <a-entity id="hotspot1" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel1" data-audio-id="audio1">
+                              data-info-id="panel1" data-audio-src="assets/info1.mp3">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -289,7 +289,7 @@
                 
                 <a-entity id="hotspot2-wrapper" class="hotspot-wrapper" position="-0.5 0.3 0.01">
                     <a-entity id="hotspot2" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel2" data-audio-id="audio2">
+                              data-info-id="panel2" data-audio-src="assets/info2.mp3">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -297,7 +297,7 @@
                 
                 <a-entity id="hotspot3-wrapper" class="hotspot-wrapper" position="0.75 -0.3 0.01">
                     <a-entity id="hotspot3" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel3" data-audio-id="audio3">
+                              data-info-id="panel3" data-audio-src="assets/info4.mp3">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -305,7 +305,7 @@
                 
                 <a-entity id="hotspot4-wrapper" class="hotspot-wrapper" position="0.3 -0.3 0.01">
                     <a-entity id="hotspot4" class="hotspot clickable" position="0 0 0"
-                              data-info-id="panel4" data-audio-id="audio4">
+                              data-info-id="panel4" data-audio-src="assets/info3.mp3">
                         <a-circle color="#007bff" opacity="0.7" radius="0.1"></a-circle>
                         <a-image src="assets/infobutton.png" position="0 0 0.01" width="0.2" height="0.2"></a-image>
                     </a-entity>
@@ -314,12 +314,9 @@
         </a-scene>
     </div>
         
-        <!-- Audio elements -->
-        <audio id="audio1" src="assets/info1.mp3" preload="auto"></audio>
-        <audio id="audio2" src="assets/info2.mp3" preload="auto"></audio>
-        <audio id="audio3" src="assets/info4.mp3" preload="auto"></audio>
-        <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
-        
+    <!-- SINGLE audio element for all audio playback -->
+    <audio id="main-audio" preload="auto"></audio>
+    
     <!-- Info panels outside of A-Frame -->
     <div id="aframe-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15;">
         <div id="panel1" class="info-panel" style="pointer-events: auto;">
@@ -470,119 +467,83 @@
             // Track active panel
             let activePanel = null;
             
-            // IMPROVED AUDIO CONTROLLER - Complete rewrite to fix repetition issue
-            const AudioController = {
-                currentAudio: null,
-                audioElements: {
-                    audio1: document.getElementById('audio1'),
-                    audio2: document.getElementById('audio2'),
-                    audio3: document.getElementById('audio3'),
-                    audio4: document.getElementById('audio4')
-                },
-                transitioning: false,
-                fadeOutTime: 200, // ms to fade out current audio
+            // COMPLETELY NEW AUDIO SYSTEM using a single audio element
+            const SingleAudioPlayer = {
+                audioElement: document.getElementById('main-audio'),
+                currentSource: null,
+                isPlaying: false,
+                isChanging: false,
                 
-                // Preload all audio files to ensure they're ready
-                preloadAll: function() {
-                    for (const id in this.audioElements) {
-                        if (this.audioElements[id]) {
-                            this.audioElements[id].load();
-                            this.audioElements[id].preload = "auto";
-                            
-                            // Add ended event to reset audio state
-                            this.audioElements[id].addEventListener('ended', () => {
-                                if (this.currentAudio === id) {
-                                    this.currentAudio = null;
-                                }
-                            });
+                init: function() {
+                    // Set up event listeners
+                    this.audioElement.addEventListener('ended', () => {
+                        this.isPlaying = false;
+                        this.currentSource = null;
+                    });
+                    
+                    this.audioElement.addEventListener('error', (e) => {
+                        console.error('Audio error:', e);
+                        this.isPlaying = false;
+                        this.isChanging = false;
+                    });
+                    
+                    this.audioElement.addEventListener('canplaythrough', () => {
+                        if (this.isChanging) {
+                            this.isChanging = false;
+                            this.play();
                         }
+                    });
+                },
+                
+                setSource: function(src) {
+                    // If already playing this source, do nothing
+                    if (this.currentSource === src && this.isPlaying) {
+                        return;
                     }
+                    
+                    // Stop current audio
+                    this.stop();
+                    
+                    // Set flag to indicate we're changing sources
+                    this.isChanging = true;
+                    
+                    // Set timeout to prevent quick source changes
+                    setTimeout(() => {
+                        // Update the source
+                        this.audioElement.src = src;
+                        this.currentSource = src;
+                        
+                        // Load the new audio
+                        this.audioElement.load();
+                    }, 100);
                 },
                 
-                // Completely play a specific audio from start to finish
-                play: function(audioId) {
-                    // Prevent play during transition
-                    if (this.transitioning) return;
+                play: function() {
+                    if (this.isChanging) return;
                     
-                    // If same audio requested, ignore
-                    if (this.currentAudio === audioId) return;
+                    const playPromise = this.audioElement.play();
                     
-                    this.transitioning = true;
-                    
-                    // Function to start the new audio
-                    const startNewAudio = () => {
-                        const newAudio = this.audioElements[audioId];
-                        if (!newAudio) {
-                            this.transitioning = false;
-                            return;
-                        }
-                        
-                        // Reset to beginning
-                        newAudio.currentTime = 0;
-                        
-                        // Set volume to full
-                        newAudio.volume = 1.0;
-                        
-                        // Play the new audio
-                        const playPromise = newAudio.play();
-                        
-                        // Handle play promise to catch any errors
-                        if (playPromise !== undefined) {
-                            playPromise
-                                .then(() => {
-                                    this.currentAudio = audioId;
-                                    this.transitioning = false;
-                                })
-                                .catch(error => {
-                                    console.error("Audio playback error:", error);
-                                    this.transitioning = false;
-                                });
-                        } else {
-                            this.currentAudio = audioId;
-                            this.transitioning = false;
-                        }
-                    };
-                    
-                    // If there's currently audio playing, fade it out first
-                    if (this.currentAudio && this.audioElements[this.currentAudio]) {
-                        const currentAudioElement = this.audioElements[this.currentAudio];
-                        
-                        // Ensure it's playing before trying to fade
-                        if (!currentAudioElement.paused) {
-                            // Complete stop of current audio before starting new one
-                            currentAudioElement.pause();
-                            currentAudioElement.currentTime = 0;
-                            
-                            // Add a small delay before starting new audio
-                            setTimeout(startNewAudio, 50);
-                        } else {
-                            startNewAudio();
-                        }
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            this.isPlaying = true;
+                        }).catch(error => {
+                            console.error("Audio play error:", error);
+                            this.isPlaying = false;
+                        });
                     } else {
-                        startNewAudio();
+                        this.isPlaying = true;
                     }
                 },
                 
-                // Stop all audio completely
-                stopAll: function() {
-                    this.transitioning = true;
-                    
-                    // Immediately stop all audio
-                    for (const id in this.audioElements) {
-                        const audio = this.audioElements[id];
-                        if (audio) {
-                            audio.pause();
-                            audio.currentTime = 0;
-                        }
-                    }
-                    
-                    this.currentAudio = null;
-                    this.transitioning = false;
+                stop: function() {
+                    this.audioElement.pause();
+                    this.audioElement.currentTime = 0;
+                    this.isPlaying = false;
                 }
             };
             
-            // Initialize audio
-            AudioController.preloadAll();
+            // Initialize the audio player
+            SingleAudioPlayer.init();
             
             // Flag to prevent interaction during camera movement
             let cameraMoving = false;
@@ -705,35 +666,9 @@
             // Store hotspot to panel relationships for positioning
             const hotspotPanelMap = {};
             
-            // Override A-Frame's click handler
-            function setupCustomClickHandling() {
-                // Get the A-Frame canvas element
-                const canvas = document.querySelector('canvas.a-canvas');
-                if (!canvas) return;
-                
-                // Create our custom click handler
-                canvas.addEventListener('click', function(e) {
-                    // Ignore clicks if camera is moving
-                    if (cameraMoving) {
-                        e.stopPropagation();
-                        return;
-                    }
-                }, true);
-            }
-            
-            // Set up interaction
-            // Wait for A-Frame to be ready
-            document.querySelector('a-scene').addEventListener('loaded', function() {
-                setupCustomClickHandling();
-                setupCameraMovementDetection();
-                setupHotspotInteraction();
-                
-                // Make the A-Frame canvas transparent
-                const canvas = document.querySelector('canvas.a-canvas');
-                if (canvas) {
-                    canvas.style.background = 'transparent';
-                }
-            });
+            // STRICT CLICK LOCKOUT to prevent any possibility of multiple clicks
+            let clickLocked = false;
+            const CLICK_LOCKOUT_TIME = 500; // ms
             
             function setupHotspotInteraction() {
                 // Add click event listeners to hotspots
@@ -741,7 +676,7 @@
                 
                 hotspots.forEach(hotspot => {
                     const panelId = hotspot.getAttribute('data-info-id');
-                    const audioId = hotspot.getAttribute('data-audio-id');
+                    const audioSrc = hotspot.getAttribute('data-audio-src');
                     
                     // Store the wrapper for this hotspot
                     const wrapper = hotspot.closest('.hotspot-wrapper');
@@ -749,20 +684,19 @@
                         hotspotPanelMap[panelId] = wrapper;
                     }
                     
-                    // ADD THROTTLING to prevent rapid clicks - this helps audio issues
-                    let isClickable = true;
-                    
                     // Completely replace hotspot click handling
                     hotspot.addEventListener('click', function(e) {
-                        // Don't process clicks if camera is moving or throttled
-                        if (cameraMoving || !isClickable) {
+                        // STRICT lockout check
+                        if (clickLocked || cameraMoving) {
                             e.stopPropagation();
                             return;
                         }
                         
-                        // Throttle clicks
-                        isClickable = false;
-                        setTimeout(() => { isClickable = true; }, 300);
+                        // Set click lockout
+                        clickLocked = true;
+                        setTimeout(() => {
+                            clickLocked = false;
+                        }, CLICK_LOCKOUT_TIME);
                         
                         // Store timestamp of click
                         lastHotspotClick = Date.now();
@@ -781,15 +715,15 @@
                                 // If already active, toggle it off
                                 panel.style.display = 'none';
                                 activePanel = null;
-                                AudioController.stopAll();
+                                SingleAudioPlayer.stop();
                             } else {
                                 // If not active, show it and play audio
                                 panel.style.display = 'block';
                                 activePanel = panelId;
                                 
-                                // Play corresponding audio through our controller
-                                if (audioId) {
-                                    AudioController.play(audioId);
+                                // Play corresponding audio
+                                if (audioSrc) {
+                                    SingleAudioPlayer.setSource(audioSrc);
                                 }
                                 
                                 // Position the panel immediately
@@ -851,8 +785,7 @@
                         panel.style.display = 'none';
                         if (activePanel === panel.id) {
                             activePanel = null;
-                            // Stop audio through our controller
-                            AudioController.stopAll();
+                            SingleAudioPlayer.stop();
                         }
                     }
                     e.stopPropagation();
@@ -867,8 +800,7 @@
                         panel.style.display = 'none';
                     });
                     
-                    // Stop all audio through our controller
-                    AudioController.stopAll();
+                    SingleAudioPlayer.stop();
                     activePanel = null;
                 }
             });
