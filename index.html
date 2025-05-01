@@ -461,57 +461,121 @@
             // Track active panel and audio
             let activePanel = null;
             
-            // Create dedicated audio controller
-            const AudioController = {
-                currentAudio: null,
-                audios: {
-                    audio1: document.getElementById('audio1'),
-                    audio2: document.getElementById('audio2'),
-                    audio3: document.getElementById('audio3'),
-                    audio4: document.getElementById('audio4')
-                },
+            // Completely revamped audio controller
+            class AudioManager {
+                constructor() {
+                    this.audios = {
+                        audio1: document.getElementById('audio1'),
+                        audio2: document.getElementById('audio2'),
+                        audio3: document.getElementById('audio3'),
+                        audio4: document.getElementById('audio4')
+                    };
+                    this.currentAudio = null;
+                    this.isPlaying = false;
+                    this.blockEvents = false;
+                    
+                    // Initialize all audio
+                    for (const id in this.audios) {
+                        if (this.audios[id]) {
+                            // Add event listeners to track audio state
+                            this.audios[id].addEventListener('play', () => {
+                                this.isPlaying = true;
+                            });
+                            
+                            this.audios[id].addEventListener('pause', () => {
+                                this.isPlaying = false;
+                            });
+                            
+                            this.audios[id].addEventListener('ended', () => {
+                                this.isPlaying = false;
+                                this.currentAudio = null;
+                            });
+                        }
+                    }
+                }
                 
-                // Play a specific audio
-                play: function(audioId) {
-                    // If same audio is already playing, do nothing
-                    if (this.currentAudio === audioId && !this.audios[audioId].paused) {
+                play(audioId) {
+                    // Block rapid successive play calls
+                    if (this.blockEvents) {
+                        console.log('Audio events blocked, ignoring play request');
                         return;
                     }
                     
-                    // Stop any currently playing audio
+                    // If requested audio is already playing, do nothing
+                    if (this.currentAudio === audioId && this.isPlaying) {
+                        console.log('Audio already playing, ignoring play request');
+                        return;
+                    }
+                    
+                    // Set a temporary block to prevent event races
+                    this.blockEvents = true;
+                    
+                    // Stop all audio first
                     this.stopAll();
                     
-                    // Play the new audio
-                    if (this.audios[audioId]) {
-                        this.audios[audioId].currentTime = 0;
-                        this.audios[audioId].play().catch(error => {
-                            console.error("Audio playback error:", error);
-                        });
-                        this.currentAudio = audioId;
+                    // Play the specified audio
+                    const audio = this.audios[audioId];
+                    if (audio) {
+                        console.log(`Playing audio: ${audioId}`);
+                        
+                        // Reset to beginning
+                        audio.currentTime = 0;
+                        
+                        // Use a Promise to play and handle errors
+                        const playPromise = audio.play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                // Playback started successfully
+                                this.currentAudio = audioId;
+                                this.isPlaying = true;
+                                this.blockEvents = false;
+                            }).catch(error => {
+                                console.error("Audio playback error:", error);
+                                this.isPlaying = false;
+                                this.currentAudio = null;
+                                this.blockEvents = false;
+                            });
+                        } else {
+                            // Older browsers might not return a promise
+                            this.currentAudio = audioId;
+                            this.blockEvents = false;
+                        }
+                    } else {
+                        console.error(`Audio element not found: ${audioId}`);
+                        this.blockEvents = false;
                     }
-                },
+                }
                 
-                // Stop a specific audio
-                stop: function(audioId) {
-                    if (this.audios[audioId]) {
-                        this.audios[audioId].pause();
-                        this.audios[audioId].currentTime = 0;
+                stop(audioId) {
+                    const audio = this.audios[audioId];
+                    if (audio) {
+                        audio.pause();
+                        audio.currentTime = 0;
+                        
                         if (this.currentAudio === audioId) {
                             this.currentAudio = null;
+                            this.isPlaying = false;
                         }
                     }
-                },
+                }
                 
-                // Stop all audio
-                stopAll: function() {
+                stopAll() {
                     for (const audioId in this.audios) {
-                        this.audios[audioId].pause();
-                        this.audios[audioId].currentTime = 0;
+                        const audio = this.audios[audioId];
+                        if (audio) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                        }
                     }
                     this.currentAudio = null;
+                    this.isPlaying = false;
                 }
-            };
-                    
+            }
+            
+            // Create a single instance of the audio manager
+            const audioManager = new AudioManager();
+            
             // Flag to prevent interaction during camera movement
             let cameraMoving = false;
             let lastCameraPosition = new THREE.Vector3();
@@ -634,31 +698,55 @@
             // Store hotspot to panel relationships for positioning
             const hotspotPanelMap = {};
             
-            // Override A-Frame's click handler to completely decuople from our audio control
-            function setupCustomClickHandling() {
-                // Get the A-Frame canvas element
-                const canvas = document.querySelector('canvas.a-canvas');
-                if (!canvas) return;
+            // Clean way to show or hide a panel
+            function showPanel(panelId, audioId) {
+                // Hide all other panels
+                panels.forEach(panel => {
+                    if (panel.id !== panelId) {
+                        panel.style.display = 'none';
+                    }
+                });
+                
+                const panel = document.getElementById(panelId);
+                if (panel) {
+                    panel.style.display = 'block';
+                    activePanel = panelId;
                     
-                // Create our custom click handler that will determine if it's a real click
-                canvas.addEventListener('click', function(e) {
-                    // Ignore clicks if camera is moving
-                    if (cameraMoving) {
-                        e.stopPropagation();
-                        return;
+                    // Play corresponding audio
+                    if (audioId) {
+                        audioManager.play(audioId);
                     }
                     
-                    // Allow the click to proceed to A-Frame
-                }, true);
+                    // Update panel position
+                    updatePanelPositions();
+                }
+            }
+            
+            function hidePanel(panelId) {
+                const panel = document.getElementById(panelId);
+                if (panel) {
+                    panel.style.display = 'none';
+                    
+                    if (activePanel === panelId) {
+                        activePanel = null;
+                    }
+                }
+            }
+            
+            function hideAllPanels() {
+                panels.forEach(panel => {
+                    panel.style.display = 'none';
+                });
+                activePanel = null;
+                audioManager.stopAll();
             }
             
             // Set up interaction
-            // Wait for A-Frame to be ready
             document.querySelector('a-scene').addEventListener('loaded', function() {
-                setupCustomClickHandling();
-                setupCameraMovementDetection();
                 setupHotspotInteraction();
-                    
+                setupCloseButtons();
+                setupCameraMovementDetection();
+                
                 // Make the A-Frame canvas transparent
                 const canvas = document.querySelector('canvas.a-canvas');
                 if (canvas) {
@@ -667,73 +755,99 @@
             });
             
             function setupHotspotInteraction() {
+                // First remove any existing click handlers from A-Frame raycaster
+                const scene = document.querySelector('a-scene');
+                const raycaster = scene.querySelector('[raycaster]');
+                
+                if (raycaster && raycaster.components.raycaster) {
+                    // Store original A-Frame click handler
+                    const originalClick = raycaster.components.raycaster.onMouseDown;
+                    
+                    // Replace with our own handler
+                    raycaster.components.raycaster.onMouseDown = function(evt) {
+                        // Skip if we're in a movement state
+                        if (cameraMoving) {
+                            return;
+                        }
+                        
+                        // Call original handler
+                        originalClick.call(raycaster.components.raycaster, evt);
+                    };
+                }
+                
                 // Add click event listeners to hotspots
                 const hotspots = document.querySelectorAll('.hotspot');
                 
                 hotspots.forEach(hotspot => {
-                    const panelId = hotspot.getAttribute('data-info-id');
-                    const audioId = hotspot.getAttribute('data-audio-id');
+                    // Remove any existing listeners by cloning
+                    const newHotspot = hotspot.cloneNode(true);
+                    hotspot.parentNode.replaceChild(newHotspot, hotspot);
+                    
+                    const panelId = newHotspot.getAttribute('data-info-id');
+                    const audioId = newHotspot.getAttribute('data-audio-id');
                     
                     // Store the wrapper for this hotspot
-                    const wrapper = hotspot.closest('.hotspot-wrapper');
+                    const wrapper = newHotspot.closest('.hotspot-wrapper');
                     if (wrapper && panelId) {
                         hotspotPanelMap[panelId] = wrapper;
                     }
                     
-                    // Disable A-Frame's raycasting for this element
-                    // to stop it from triggering our hotspots
-                    const scene = document.querySelector('a-scene');
-                    const raycaster = scene.querySelector('[raycaster]');
-                    
-                    // Completely replace hotspot click handling
-                    hotspot.addEventListener('click', function(e) {
-                        // Don't process clicks if camera is moving or time since last click is too short
+                    // Add our single click handler
+                    newHotspot.addEventListener('click', function(e) {
+                        if (cameraMoving) {
+                            e.stopPropagation();
+                            return;
+                        }
+                        
                         const now = Date.now();
-                        if (cameraMoving || (now - lastHotspotClick < 500)) {
+                        if (now - lastHotspotClick < 500) {
                             e.stopPropagation();
                             return;
                         }
                         lastHotspotClick = now;
                         
-                        // Hide all panels except the active one
-                        panels.forEach(panel => {
-                            if (panel.id !== panelId) {
-                                panel.style.display = 'none';
-                            }
-                        });
+                        console.log(`Hotspot clicked: ${panelId}, Audio: ${audioId}`);
                         
-                        // Toggle the clicked panel
-                        const panel = document.getElementById(panelId);
-                        if (panel) {
-                            if (activePanel === panelId) {
-                                // If already active, toggle it off
-                                panel.style.display = 'none';
-                                activePanel = null;
-                                AudioController.stopAll();
-                            } else {
-                                // If not active, show it and play audio
-                                panel.style.display = 'block';
-                                activePanel = panelId;
-                                
-                                // Play corresponding audio through our controller
-                                if (audioId) {
-                                    AudioController.play(audioId);
-                                }
-                                
-                                // Position the panel immediately
-                                updatePanelPositions();
-                            }
-                    }
-                    
-                    e.stopPropagation();
+                        if (activePanel === panelId) {
+                            // Toggle off
+                            hidePanel(panelId);
+                            audioManager.stopAll();
+                        } else {
+                            // Toggle on
+                            showPanel(panelId, audioId);
+                        }
+                        
+                        e.stopPropagation();
+                    }, true);
                 });
-            });
             }
             
-            // Define the vertical offset for panels (increased for more space)
-            const PANEL_OFFSET = 60; // 60px space below hotspots
+            function setupCloseButtons() {
+                const closeBtns = document.querySelectorAll('.close-btn');
+                
+                closeBtns.forEach(btn => {
+                    // Remove existing listeners by cloning
+                    const newBtn = btn.cloneNode(true);
+                    btn.parentNode.replaceChild(newBtn, btn);
+                    
+                    const panelId = newBtn.getAttribute('data-panel-id');
+                    
+                    newBtn.addEventListener('click', function(e) {
+                        console.log(`Close button clicked for panel: ${panelId}`);
+                        
+                        hidePanel(panelId);
+                        audioManager.stopAll();
+                        
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }, true);
+                });
+            }
             
-            // Function to update panel positions based on hotspot positions
+            // Define the vertical offset for panels
+            const PANEL_OFFSET = 60;
+            
+            // Function to update panel positions
             function updatePanelPositions() {
                 const scene = document.querySelector('a-scene');
                 const camera = document.querySelector('[camera]');
@@ -762,7 +876,7 @@
                         const x = (vector.x + 1) / 2 * width;
                         const y = (-vector.y + 1) / 2 * height;
                         
-                        // Position panel below hotspot with increased offset
+                        // Position panel below hotspot with offset
                         panel.style.position = 'absolute';
                         panel.style.left = x + 'px';
                         panel.style.top = (y + PANEL_OFFSET) + 'px'; 
@@ -771,52 +885,11 @@
                 }
             }
             
-            // Fixed close panel function - this is the key change
-            function closePanel(panelId) {
-                const panel = document.getElementById(panelId);
-                if (panel) {
-                    panel.style.display = 'none';
-                    
-                    if (activePanel === panelId) {
-                        activePanel = null;
-                        AudioController.stopAll();
-                    }
-                }
-            }
-            
-            // Improved close button handling
-            // Remove old event listeners first to prevent duplicates
-            const closeBtns = document.querySelectorAll('.close-btn');
-            closeBtns.forEach((btn) => {
-                // First remove any existing listeners by creating a new clone
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                // Add new event listener with improved handling
-                newBtn.addEventListener('click', function(e) {
-                    // Get panel ID from data attribute
-                    const panelId = this.getAttribute('data-panel-id');
-                    
-                    // Close the panel using our dedicated function
-                    if (panelId) {
-                        closePanel(panelId);
-                    }
-                    
-                    // Prevent event propagation completely
-                    e.stopPropagation();
-                    e.preventDefault();
-                    return false;
-                });
-            });
-            
-            // Document click handler for closing panels
+            // Close all panels when clicking elsewhere
             document.addEventListener('click', function(e) {
                 // Don't close if clicking inside a panel, an A-Frame entity, or a button
                 if (!e.target.closest('.info-panel') && !e.target.closest('a-entity') && !e.target.closest('button')) {
-                    // Use the closePanel function for consistency
-                    panels.forEach(panel => {
-                        closePanel(panel.id);
-                    });
+                    hideAllPanels();
                 }
             });
             
