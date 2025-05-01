@@ -45,44 +45,6 @@
             z-index: 1;
         }
         
-        /* Remove default A-Frame canvas styling */
-        .a-canvas {
-            background-color: transparent !important;
-        }
-        
-        .flying-effects-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-            top: 0;
-            left: 0;
-        }
-        
-        .flying-effect {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background-image: url('assets/flyingeffect.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            pointer-events: none;
-            animation: float 10s infinite linear;
-        }
-        
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
-            100% {
-                transform: translateY(0) rotate(360deg);
-            }
-        }
-        
         .info-panel {
             display: none;
             position: absolute;
@@ -92,7 +54,7 @@
             padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             z-index: 20;
-            transform: translate(-50%, 20px);
+            transform: translate(-50%, 0);
             min-height: 120px;
         }
         
@@ -164,9 +126,70 @@
             align-items: center;
         }
         
-        /* Fix for removing white borders around A-Frame elements */
-        .a-enter-vr, .a-orientation-modal {
-            display: none !important;
+        .move-controls {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 5px;
+            z-index: 20;
+        }
+        
+        .move-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #move-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        #move-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        #move-center {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        
+        #move-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        #move-down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        #move-forward {
+            grid-column: 1;
+            grid-row: 1;
+        }
+        
+        #move-backward {
+            grid-column: 3;
+            grid-row: 3;
+        }
+        
+        /* Fix for A-Frame canvas */
+        .a-canvas {
+            background-color: transparent !important;
         }
     </style>
 </head>
@@ -178,7 +201,7 @@
 
     <!-- A-Frame Scene (without AR tracking) -->
     <div class="a-frame-container">
-        <a-scene embedded vr-mode-ui="enabled: false" cursor="rayOrigin: mouse" renderer="alpha: true; antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true;">
+        <a-scene embedded transparent="true" vr-mode-ui="enabled: false" cursor="rayOrigin: mouse">
             <!-- Custom cursor for interaction -->
             <a-entity camera look-controls="pointerLockEnabled: false" wasd-controls="enabled: false" position="0 1.6 0">
                 <a-entity cursor="fuse: false" position="0 0 -1"
@@ -189,14 +212,12 @@
             <!-- This entity will hold our image and flying effects -->
             <a-entity id="chateau-image-container" position="0 1.6 -3">
                 <!-- Main image as a plane with transparent material -->
-                <a-plane id="chateau-image" src="assets/img1.png" position="0 0 0" 
-                         width="2.5" height="1.7" class="clickable"
-                         material="shader: flat; transparent: true; side: double; alphaTest: 0.5;"></a-plane>
+                <a-image id="chateau-image" src="assets/img1.png" position="0 0 0" 
+                        width="2.5" height="1.7" class="clickable" transparent="true" 
+                        shader="standard" side="double"></a-image>
                 
-                <!-- Flying effects container attached to the image -->
-                <a-entity id="flying-effects-parent" position="0 0 0.1">
-                    <a-entity id="aframe-flying-effects" class="flying-effects-container"></a-entity>
-                </a-entity>
+                <!-- Flying effects as entities inside the container -->
+                <a-entity id="flying-effects-container"></a-entity>
                 
                 <!-- Hotspots as entities -->
                 <a-entity id="hotspot1" class="hotspot clickable" position="-0.75 -0.3 0.01"
@@ -233,31 +254,33 @@
     <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
     
     <!-- Info panels -->
-    <div class="info-panel" id="panel1">
-        <div class="info-content">
-            <span class="close-btn">&times;</span>
-            <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
+    <div id="panels-container">
+        <div class="info-panel" id="panel1">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>The Green Lady</b><br> The ghost of Charlotte, known as the Green Lady, is said to haunt the castle after being murdered by her husband in a fit of jealousy. Her spirit is often seen roaming the tower in a green dress.</div>
+            </div>
         </div>
-    </div>
-    
-    <div class="info-panel" id="panel2">
-        <div class="info-content">
-            <span class="close-btn">&times;</span>
-            <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+        
+        <div class="info-panel" id="panel2">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>The Muder Room</b><br> Visitors claim cold chills and strange sounds in the room where Charlotte was killed. It's said her final scream still echoes through the walls.</div>
+            </div>
         </div>
-    </div>
-    
-    <div class="info-panel" id="panel3">
-        <div class="info-content">
-            <span class="close-btn">&times;</span>
-            <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+        
+        <div class="info-panel" id="panel3">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>Ghostly Windows</b><br> Locals say that at night, flickering lights or ghostly silhouettes sometimes appear in the upper windows—especially in the tower where the Green Lady died.</div>
+            </div>
         </div>
-    </div>
-    
-    <div class="info-panel" id="panel4">
-        <div class="info-content">
-            <span class="close-btn">&times;</span>
-            <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+        
+        <div class="info-panel" id="panel4">
+            <div class="info-content">
+                <span class="close-btn">&times;</span>
+                <div class="info-text"><b>Wailing Echoes</b><br> At night, eerie wails and whispers can be heard in the halls, especially near the chapel and upper levels. Many believe it's the voice of the restless Green Lady.</div>
+            </div>
         </div>
     </div>
     
@@ -269,6 +292,16 @@
     <div class="zoom-controls">
         <button class="zoom-btn" id="zoom-in">+</button>
         <button class="zoom-btn" id="zoom-out">−</button>
+    </div>
+    
+    <div class="move-controls">
+        <button class="move-btn" id="move-forward">↖</button>
+        <button class="move-btn" id="move-up">↑</button>
+        <button class="move-btn" id="move-left">←</button>
+        <button class="move-btn" id="move-center">•</button>
+        <button class="move-btn" id="move-right">→</button>
+        <button class="move-btn" id="move-down">↓</button>
+        <button class="move-btn" id="move-backward">↘</button>
     </div>
     
     <script>
@@ -287,10 +320,10 @@
                     });
             }
             
-            // Create flying effects now attached to the 3D entity
-            const flyingEffectsContainer = document.getElementById('aframe-flying-effects');
+            // Create flying effects inside A-Frame scene
+            const flyingEffectsContainer = document.getElementById('flying-effects-container');
             
-            // Create flying effects function
+            // Create flying effects function using A-Frame entities
             function createFlyingEffects() {
                 // Clear existing effects
                 while (flyingEffectsContainer.firstChild) {
@@ -299,65 +332,59 @@
                 
                 // Create multiple flying effects
                 for (let i = 0; i < 20; i++) {
-                    const fx = document.createElement('div');
-                    fx.classList.add('flying-effect');
-                    fx.id = `flyingEffect${i}`;
+                    // Create random position within the image area but with some extension
+                    const x = (Math.random() * 3) - 1.5; // from -1.5 to 1.5
+                    const y = (Math.random() * 2) - 1; // from -1 to 1
+                    const z = (Math.random() * 0.5) - 0.25; // slightly in front or behind
                     
-                    // Random positions across the image area
-                    const x = (Math.random() * 100 - 50) + '%'; // -50% to 50%
-                    const y = (Math.random() * 100 - 50) + '%'; // -50% to 50%
-                    const scale = 0.5 + Math.random() * 1; // random size
-                    const duration = 5 + Math.random() * 10; // random animation duration
+                    // Random size and rotation
+                    const scale = 0.05 + (Math.random() * 0.1); // 0.05 to 0.15
                     
-                    fx.style.left = x;
-                    fx.style.top = y;
-                    fx.style.transform = `scale(${scale})`;
-                    fx.style.animationDuration = `${duration}s`;
-                    fx.style.animationDelay = `${Math.random() * 5}s`;
+                    // Create A-Frame entity for flying effect
+                    const effect = document.createElement('a-entity');
+                    effect.setAttribute('id', `flyingEffect${i}`);
+                    effect.setAttribute('position', `${x} ${y} ${z}`);
+                    effect.setAttribute('scale', `${scale} ${scale} ${scale}`);
                     
-                    flyingEffectsContainer.appendChild(fx);
+                    // Create a plane with the flying effect texture
+                    const effectPlane = document.createElement('a-plane');
+                    effectPlane.setAttribute('src', 'assets/flyingeffect.png');
+                    effectPlane.setAttribute('transparent', 'true');
+                    effectPlane.setAttribute('shader', 'flat');
+                    effectPlane.setAttribute('width', '1');
+                    effectPlane.setAttribute('height', '1');
+                    
+                    // Add animation
+                    const animDuration = 5 + (Math.random() * 10);
+                    const anim = document.createElement('a-animation');
+                    anim.setAttribute('attribute', 'rotation');
+                    anim.setAttribute('from', '0 0 0');
+                    anim.setAttribute('to', '0 0 360');
+                    anim.setAttribute('dur', `${animDuration * 1000}`);
+                    anim.setAttribute('repeat', 'indefinite');
+                    anim.setAttribute('easing', 'linear');
+                    
+                    const animFloat = document.createElement('a-animation');
+                    animFloat.setAttribute('attribute', 'position');
+                    animFloat.setAttribute('from', `${x} ${y} ${z}`);
+                    animFloat.setAttribute('to', `${x} ${y + 0.2} ${z}`);
+                    animFloat.setAttribute('dur', `${animDuration * 500}`);
+                    animFloat.setAttribute('direction', 'alternate');
+                    animFloat.setAttribute('repeat', 'indefinite');
+                    animFloat.setAttribute('easing', 'ease-in-out');
+                    
+                    effectPlane.appendChild(anim);
+                    effect.appendChild(animFloat);
+                    effect.appendChild(effectPlane);
+                    flyingEffectsContainer.appendChild(effect);
                 }
             }
-            
-            // Create initial flying effects
-            createFlyingEffects();
-            
-            // Periodically regenerate some effects
-            setInterval(() => {
-                // Remove 5 random effects and create new ones
-                const effects = flyingEffectsContainer.querySelectorAll('.flying-effect');
-                for (let i = 0; i < 5; i++) {
-                    if (effects.length > i) {
-                        const randomIndex = Math.floor(Math.random() * effects.length);
-                        if (effects[randomIndex]) {
-                            effects[randomIndex].remove();
-                        }
-                    }
-                    
-                    // Create a new effect
-                    const fx = document.createElement('div');
-                    fx.classList.add('flying-effect');
-                    fx.id = `flyingEffect${Math.random()}`;
-                    
-                    // Random positions
-                    const x = (Math.random() * 100 - 50) + '%'; // -50% to 50%
-                    const y = (Math.random() * 100 - 50) + '%'; // -50% to 50%
-                    const scale = 0.5 + Math.random() * 1;
-                    const duration = 5 + Math.random() * 10;
-                    
-                    fx.style.left = x;
-                    fx.style.top = y;
-                    fx.style.transform = `scale(${scale})`;
-                    fx.style.animationDuration = `${duration}s`;
-                    
-                    flyingEffectsContainer.appendChild(fx);
-                }
-            }, 5000);
             
             // Get image container and panels
             const imageContainer = document.getElementById('chateau-image-container');
             const panels = document.querySelectorAll('.info-panel');
             const closeBtns = document.querySelectorAll('.close-btn');
+            const panelsContainer = document.getElementById('panels-container');
             
             // Variables for positioning
             let currentScale = 1;
@@ -368,6 +395,66 @@
                 y: 1.6,
                 z: -3
             };
+            
+            // Create initial flying effects
+            createFlyingEffects();
+            
+            // Periodically replace some flying effects for variety
+            setInterval(() => {
+                // Get current effects
+                const effects = flyingEffectsContainer.querySelectorAll('a-entity[id^="flyingEffect"]');
+                
+                // Replace a few random effects
+                for (let i = 0; i < 3; i++) {
+                    if (effects.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * effects.length);
+                        if (effects[randomIndex]) {
+                            effects[randomIndex].remove();
+                            
+                            // Create a new effect
+                            const x = (Math.random() * 3) - 1.5;
+                            const y = (Math.random() * 2) - 1;
+                            const z = (Math.random() * 0.5) - 0.25;
+                            const scale = 0.05 + (Math.random() * 0.1);
+                            
+                            const effect = document.createElement('a-entity');
+                            effect.setAttribute('id', `flyingEffect${Math.random()}`);
+                            effect.setAttribute('position', `${x} ${y} ${z}`);
+                            effect.setAttribute('scale', `${scale} ${scale} ${scale}`);
+                            
+                            const effectPlane = document.createElement('a-plane');
+                            effectPlane.setAttribute('src', 'assets/flyingeffect.png');
+                            effectPlane.setAttribute('transparent', 'true');
+                            effectPlane.setAttribute('shader', 'flat');
+                            effectPlane.setAttribute('width', '1');
+                            effectPlane.setAttribute('height', '1');
+                            
+                            const animDuration = 5 + (Math.random() * 10);
+                            const anim = document.createElement('a-animation');
+                            anim.setAttribute('attribute', 'rotation');
+                            anim.setAttribute('from', '0 0 0');
+                            anim.setAttribute('to', '0 0 360');
+                            anim.setAttribute('dur', `${animDuration * 1000}`);
+                            anim.setAttribute('repeat', 'indefinite');
+                            anim.setAttribute('easing', 'linear');
+                            
+                            const animFloat = document.createElement('a-animation');
+                            animFloat.setAttribute('attribute', 'position');
+                            animFloat.setAttribute('from', `${x} ${y} ${z}`);
+                            animFloat.setAttribute('to', `${x} ${y + 0.2} ${z}`);
+                            animFloat.setAttribute('dur', `${animDuration * 500}`);
+                            animFloat.setAttribute('direction', 'alternate');
+                            animFloat.setAttribute('repeat', 'indefinite');
+                            animFloat.setAttribute('easing', 'ease-in-out');
+                            
+                            effectPlane.appendChild(anim);
+                            effect.appendChild(animFloat);
+                            effect.appendChild(effectPlane);
+                            flyingEffectsContainer.appendChild(effect);
+                        }
+                    }
+                }
+            }, 5000);
             
             // Zoom controls
             const zoomIn = document.getElementById('zoom-in');
@@ -387,10 +474,50 @@
                 }
             });
             
-            // Function to update transform
+            // Movement controls
+            const moveStep = 0.3;
+            
+            document.getElementById('move-up').addEventListener('click', function() {
+                currentPosition.y += moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-down').addEventListener('click', function() {
+                currentPosition.y -= moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-left').addEventListener('click', function() {
+                currentPosition.x -= moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-right').addEventListener('click', function() {
+                currentPosition.x += moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-forward').addEventListener('click', function() {
+                currentPosition.z += moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-backward').addEventListener('click', function() {
+                currentPosition.z -= moveStep;
+                updateTransform();
+            });
+            
+            document.getElementById('move-center').addEventListener('click', function() {
+                currentPosition.x = 0;
+                currentPosition.y = 1.6;
+                updateTransform();
+            });
+            
+            // Function to update transform and panel positions
             function updateTransform() {
                 imageContainer.setAttribute('position', `${currentPosition.x} ${currentPosition.y} ${currentPosition.z}`);
                 imageContainer.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+                updatePanelPositions();
             }
             
             // Reset position button
@@ -408,6 +535,12 @@
             // Wait for A-Frame to be ready
             document.querySelector('a-scene').addEventListener('loaded', function() {
                 setupInteraction();
+                
+                // Make the A-Frame canvas transparent
+                const canvas = document.querySelector('canvas.a-canvas');
+                if (canvas) {
+                    canvas.style.background = 'transparent';
+                }
             });
             
             function setupInteraction() {
@@ -415,7 +548,7 @@
                 const hotspots = document.querySelectorAll('.hotspot');
                 
                 hotspots.forEach(hotspot => {
-                    hotspot.addEventListener('click', function(event) {
+                    hotspot.addEventListener('click', function() {
                         const panelId = this.getAttribute('data-info-id');
                         const audioId = this.getAttribute('data-audio-id');
                         
@@ -424,33 +557,13 @@
                             panel.style.display = 'none';
                         });
                         
-                        // Position and show corresponding panel under the hotspot
+                        // Show corresponding panel
                         if (panelId) {
                             const panel = document.getElementById(panelId);
-                            
-                            // Get hotspot position in screen coordinates
-                            const position = this.object3D.position;
-                            const parentPosition = imageContainer.object3D.position;
-                            const parentScale = imageContainer.object3D.scale;
-                            
-                            // Calculate screen coordinates
-                            const camera = document.querySelector('a-entity[camera]').object3D;
-                            const vector = new THREE.Vector3();
-                            
-                            // Get world position of the hotspot
-                            this.object3D.getWorldPosition(vector);
-                            
-                            // Project to screen coordinates
-                            vector.project(camera.children[0]);
-                            
-                            // Convert to screen pixels
-                            const x = (vector.x + 1) / 2 * window.innerWidth;
-                            const y = (-vector.y + 1) / 2 * window.innerHeight;
-                            
-                            // Position panel below hotspot
-                            panel.style.left = x + 'px';
-                            panel.style.top = (y + 60) + 'px'; // Offset to appear below
                             panel.style.display = 'block';
+                            
+                            // Update panel position
+                            updatePanelPositions();
                         }
                         
                         // Stop all audio
@@ -468,10 +581,41 @@
                                 });
                             }
                         }
-                        
-                        // Stop event propagation
-                        event.stopPropagation();
                     });
+                });
+            }
+            
+            // Function to update panel positions based on hotspot positions
+            function updatePanelPositions() {
+                const hotspots = document.querySelectorAll('.hotspot');
+                const scene = document.querySelector('a-scene');
+                const camera = document.querySelector('[camera]');
+                
+                hotspots.forEach((hotspot, index) => {
+                    const panelId = hotspot.getAttribute('data-info-id');
+                    const panel = document.getElementById(panelId);
+                    
+                    if (panel) {
+                        // Get world position of hotspot
+                        const worldPos = new THREE.Vector3();
+                        hotspot.object3D.getWorldPosition(worldPos);
+                        
+                        // Convert to screen coordinates
+                        const canvas = scene.canvas;
+                        const width = canvas.clientWidth;
+                        const height = canvas.clientHeight;
+                        
+                        // Project 3D position to 2D screen space
+                        const vector = worldPos.project(camera.components.camera.camera);
+                        
+                        // Convert to CSS coordinates
+                        const x = (vector.x + 1) / 2 * width;
+                        const y = (-vector.y + 1) / 2 * height;
+                        
+                        // Position panel below hotspot
+                        panel.style.left = x + 'px';
+                        panel.style.top = (y + 50) + 'px'; // 50px below hotspot
+                    }
                 });
             }
             
@@ -486,18 +630,15 @@
             // Close all panels when clicking elsewhere
             document.addEventListener('click', function(e) {
                 // Don't close if clicking inside a panel
-                if (!e.target.closest('.info-panel') && !e.target.closest('button')) {
+                if (!e.target.closest('.info-panel') && !e.target.closest('a-entity') && !e.target.closest('button')) {
                     panels.forEach(panel => {
                         panel.style.display = 'none';
                     });
                 }
             });
             
-            // Fix for A-Frame styling
-            const canvas = document.querySelector('canvas.a-canvas');
-            if (canvas) {
-                canvas.style.background = 'transparent';
-            }
+            // Update panel positions when window resizes
+            window.addEventListener('resize', updatePanelPositions);
         });
     </script>
 </body>
