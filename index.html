@@ -33,14 +33,16 @@
         }
         
         .container {
-            position: relative;
-            width: 100%;
-            height: 100vh;
+            max-width: 800px;
+            margin: 0 auto;
             text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
         }
         
         .flying-effects-container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -72,46 +74,56 @@
             }
         }
         
-        .hotspots-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 20px;
+        }
+        
+        .image-container {
+            position: relative;
+            margin: 20px auto;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
         
         .hotspot {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             background-color: rgba(0, 123, 255, 0.7);
             border-radius: 50%;
-            cursor: move;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 15;
+            transform: translate(-50%, -50%);
         }
         
         .hotspot img {
             width: 100%;
             height: 100%;
-            pointer-events: none;
         }
         
         .info-panel {
             display: none;
             position: absolute;
-            width: 250px;
+            width: 30%;
+            height: 50%;
             background-color: white;
             border-radius: 20px;
             padding: 15px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 20;
+            z-index: 10;
+            transform: translate(-50%, 0);
             min-height: 120px;
             max-height: 200px;
-            transform: translate(-50%, 10px);
         }
         
         .info-content {
@@ -135,25 +147,6 @@
             line-height: 1.5;
             text-align: center;
         }
-        
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 30;
-        }
-        
-        .add-hotspot-btn {
-            background-color: rgba(0, 123, 255, 0.8);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
     </style>
 </head>
 <body>
@@ -162,18 +155,20 @@
         <video id="camera-feed" autoplay playsinline></video>
     </div>
 
+    <!-- Flying effects container (over camera but under UI) -->
+    <div id="flyingEffects" class="flying-effects-container"></div>
+
     <div class="container">
-        <!-- Flying effects container -->
-        <div id="flyingEffects" class="flying-effects-container"></div>
-        
         <!-- Audio elements -->
         <audio id="audio1" src="assets/info1.mp3" preload="auto"></audio>
         <audio id="audio2" src="assets/info2.mp3" preload="auto"></audio>
         <audio id="audio3" src="assets/info4.mp3" preload="auto"></audio>
         <audio id="audio4" src="assets/info3.mp3" preload="auto"></audio>
         
-        <div class="hotspots-container" id="hotspotsContainer">
-            <div class="hotspot" id="hotspot1">
+        <div class="image-container">
+            <img src="assets/img1.png" alt="Château de Brissac">
+            
+            <div class="hotspot" id="hotspot1" data-position="-0.6 0.01 0.01">
                 <img src="assets/infobutton.png" alt="Info 1">
             </div>
             <div class="info-panel" id="panel1">
@@ -183,7 +178,7 @@
                 </div>
             </div>
             
-            <div class="hotspot" id="hotspot2">
+            <div class="hotspot" id="hotspot2" data-position="-0.4 0.4 0.01">
                 <img src="assets/infobutton.png" alt="Info 2">
             </div>
             <div class="info-panel" id="panel2">
@@ -193,7 +188,7 @@
                 </div>
             </div>
             
-            <div class="hotspot" id="hotspot3">
+            <div class="hotspot" id="hotspot3" data-position="0.6 0.0141 0.01">
                 <img src="assets/infobutton.png" alt="Info 3">
             </div>
             <div class="info-panel" id="panel3">
@@ -203,7 +198,7 @@
                 </div>
             </div>
             
-            <div class="hotspot" id="hotspot4">
+            <div class="hotspot" id="hotspot4" data-position="0.2 0.0141 0.01">
                 <img src="assets/infobutton.png" alt="Info 4">
             </div>
             <div class="info-panel" id="panel4">
@@ -213,38 +208,10 @@
                 </div>
             </div>
         </div>
-        
-        <div class="controls">
-            <button class="add-hotspot-btn" id="addHotspotBtn">+</button>
-        </div>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Create flying effects
-            const flyingEffectsContainer = document.getElementById('flyingEffects');
-            
-            // Create multiple flying effects
-            for (let i = 0; i < 20; i++) {
-                const fx = document.createElement('div');
-                fx.classList.add('flying-effect');
-                fx.id = `flyingEffect${i}`;
-                
-                // Random positions
-                const x = Math.random() * 100; // percentage across screen
-                const y = Math.random() * 100; // percentage down screen
-                const scale = 0.5 + Math.random() * 1; // random size
-                const duration = 5 + Math.random() * 10; // random animation duration
-                
-                fx.style.left = `${x}%`;
-                fx.style.top = `${y}%`;
-                fx.style.transform = `scale(${scale})`;
-                fx.style.animationDuration = `${duration}s`;
-                fx.style.animationDelay = `${Math.random() * 5}s`;
-                
-                flyingEffectsContainer.appendChild(fx);
-            }
-            
             // Start camera
             const video = document.getElementById('camera-feed');
             
@@ -259,132 +226,124 @@
                     });
             }
             
-            // Position hotspots randomly initially
-            const hotspotsContainer = document.getElementById('hotspotsContainer');
+            // Create flying effects
+            const flyingEffectsContainer = document.getElementById('flyingEffects');
+            
+            // Create flying effects function
+            function createFlyingEffects() {
+                // Clear existing effects
+                flyingEffectsContainer.innerHTML = '';
+                
+                // Create multiple flying effects
+                for (let i = 0; i < 20; i++) {
+                    const fx = document.createElement('div');
+                    fx.classList.add('flying-effect');
+                    fx.id = `flyingEffect${i}`;
+                    
+                    // Random positions across the entire screen
+                    const x = Math.random() * 100; // percentage across screen
+                    const y = Math.random() * 100; // percentage down screen
+                    const scale = 0.5 + Math.random() * 1; // random size
+                    const duration = 5 + Math.random() * 10; // random animation duration
+                    
+                    fx.style.left = `${x}%`;
+                    fx.style.top = `${y}%`;
+                    fx.style.transform = `scale(${scale})`;
+                    fx.style.animationDuration = `${duration}s`;
+                    fx.style.animationDelay = `${Math.random() * 5}s`;
+                    
+                    flyingEffectsContainer.appendChild(fx);
+                }
+            }
+            
+            // Create initial flying effects
+            createFlyingEffects();
+            
+            // Periodically regenerate some effects
+            setInterval(() => {
+                // Remove 5 random effects and create new ones
+                const effects = document.querySelectorAll('.flying-effect');
+                for (let i = 0; i < 5; i++) {
+                    if (effects.length > i) {
+                        const randomIndex = Math.floor(Math.random() * effects.length);
+                        if (effects[randomIndex]) {
+                            effects[randomIndex].remove();
+                        }
+                    }
+                    
+                    // Create a new effect
+                    const fx = document.createElement('div');
+                    fx.classList.add('flying-effect');
+                    fx.id = `flyingEffect${Math.random()}`;
+                    
+                    // Random positions
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 100;
+                    const scale = 0.5 + Math.random() * 1;
+                    const duration = 5 + Math.random() * 10;
+                    
+                    fx.style.left = `${x}%`;
+                    fx.style.top = `${y}%`;
+                    fx.style.transform = `scale(${scale})`;
+                    fx.style.animationDuration = `${duration}s`;
+                    
+                    flyingEffectsContainer.appendChild(fx);
+                }
+            }, 5000);
+            
+            // Position hotspots and info panels
+            const imageContainer = document.querySelector('.image-container');
             const hotspots = document.querySelectorAll('.hotspot');
             const panels = document.querySelectorAll('.info-panel');
             const closeBtns = document.querySelectorAll('.close-btn');
             
-            // Initial position for hotspots
+            // Position hotspots based on data-position attribute
             hotspots.forEach((hotspot, index) => {
-                // Random positions
-                const x = 20 + Math.random() * 60; // percentage across screen (20-80%)
-                const y = 20 + Math.random() * 60; // percentage down screen (20-80%)
-                
-                hotspot.style.left = `${x}%`;
-                hotspot.style.top = `${y}%`;
-                
-                // Setup draggable functionality
-                makeDraggable(hotspot);
+                if (hotspot.dataset.position) {
+                    const [x, y, z] = hotspot.dataset.position.split(' ').map(Number);
+                    
+                    // Convert coordinates to percentages
+                    const leftPercent = ((x + 1) / 2) * 100;
+                    const topPercent = ((y + 1) / 2) * 100;
+                    
+                    hotspot.style.left = leftPercent + '%';
+                    hotspot.style.top = topPercent + '%';
+                    
+                    // Position corresponding panel under the hotspot
+                    const panel = panels[index];
+                    panel.style.left = leftPercent + '%';
+                    panel.style.top = (topPercent + 5) + '%';
+                }
             });
             
-            // Make hotspots draggable
-            function makeDraggable(element) {
-                let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-                let isDragging = false;
-                
-                element.onmousedown = dragMouseDown;
-                element.ontouchstart = dragTouchStart;
-                
-                function dragMouseDown(e) {
-                    e.preventDefault();
-                    // Get the mouse cursor position at startup
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    document.onmouseup = closeDragElement;
-                    // Call a function whenever the cursor moves
-                    document.onmousemove = elementDrag;
-                    isDragging = true;
-                }
-                
-                function dragTouchStart(e) {
-                    e.preventDefault();
-                    // Get the touch position at startup
-                    pos3 = e.touches[0].clientX;
-                    pos4 = e.touches[0].clientY;
-                    document.ontouchend = closeDragElement;
-                    // Call a function whenever the touch moves
-                    document.ontouchmove = elementTouchDrag;
-                    isDragging = true;
-                }
-                
-                function elementDrag(e) {
-                    e.preventDefault();
-                    // Calculate the new cursor position
-                    pos1 = pos3 - e.clientX;
-                    pos2 = pos4 - e.clientY;
-                    pos3 = e.clientX;
-                    pos4 = e.clientY;
-                    // Set the element's new position
-                    element.style.top = (element.offsetTop - pos2) + "px";
-                    element.style.left = (element.offsetLeft - pos1) + "px";
-                }
-                
-                function elementTouchDrag(e) {
-                    e.preventDefault();
-                    // Calculate the new touch position
-                    pos1 = pos3 - e.touches[0].clientX;
-                    pos2 = pos4 - e.touches[0].clientY;
-                    pos3 = e.touches[0].clientX;
-                    pos4 = e.touches[0].clientY;
-                    // Set the element's new position
-                    element.style.top = (element.offsetTop - pos2) + "px";
-                    element.style.left = (element.offsetLeft - pos1) + "px";
-                }
-                
-                function closeDragElement() {
-                    // Stop moving when mouse button is released
-                    document.onmouseup = null;
-                    document.onmousemove = null;
-                    document.ontouchend = null;
-                    document.ontouchmove = null;
-                    
-                    // If it was just a click (not a drag), trigger click event
-                    if (isDragging) {
-                        setTimeout(() => {
-                            isDragging = false;
-                        }, 10);
-                    }
-                }
-                
-                // Add separate click handler to show info panel
-                element.addEventListener('click', function(e) {
-                    if (!isDragging) {
-                        const index = Array.from(hotspots).indexOf(element);
-                        showInfoPanel(index, element);
-                        e.stopPropagation();
-                    }
-                });
-            }
-            
-            // Function to show info panel
-            function showInfoPanel(index, hotspot) {
-                // Hide all panels
-                panels.forEach(panel => {
-                    panel.style.display = 'none';
-                });
-                
-                // Position and show corresponding panel
-                const panel = panels[index];
-                const rect = hotspot.getBoundingClientRect();
-                panel.style.left = rect.left + (rect.width / 2) + 'px';
-                panel.style.top = rect.bottom + 'px';
-                panel.style.display = 'block';
-                
-                // Stop all audio
-                document.querySelectorAll('audio').forEach(audio => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                });
-                
-                // Play corresponding audio
-                const audio = document.getElementById(`audio${index+1}`);
-                if (audio) {
-                    audio.play().catch(error => {
-                        console.error("Audio playback error:", error);
+            // Add click event to each hotspot
+            hotspots.forEach((hotspot, index) => {
+                hotspot.addEventListener('click', function(e) {
+                    // Hide all panels
+                    panels.forEach(panel => {
+                        panel.style.display = 'none';
                     });
-                }
-            }
+                    
+                    // Show corresponding panel
+                    panels[index].style.display = 'block';
+                    
+                    // Stop all audio
+                    document.querySelectorAll('audio').forEach(audio => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    });
+                    
+                    // Play corresponding audio
+                    const audio = document.getElementById(`audio${index+1}`);
+                    if (audio) {
+                        audio.play().catch(error => {
+                            console.error("Audio playback error:", error);
+                        });
+                    }
+                    
+                    e.stopPropagation();
+                });
+            });
             
             // Close info panel when clicking the close button
             closeBtns.forEach((btn, index) => {
@@ -404,63 +363,6 @@
             // Prevent closing when clicking on the panel itself
             panels.forEach(panel => {
                 panel.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-            
-            // Add functionality to add new hotspots
-            let hotspotCount = hotspots.length;
-            const addHotspotBtn = document.getElementById('addHotspotBtn');
-            
-            addHotspotBtn.addEventListener('click', function() {
-                hotspotCount++;
-                const newHotspot = document.createElement('div');
-                newHotspot.classList.add('hotspot');
-                newHotspot.id = `hotspot${hotspotCount}`;
-                
-                // Add image to hotspot
-                const hotspotImg = document.createElement('img');
-                hotspotImg.src = 'assets/infobutton.png';
-                hotspotImg.alt = `Info ${hotspotCount}`;
-                newHotspot.appendChild(hotspotImg);
-                
-                // Position in center of screen
-                newHotspot.style.left = '50%';
-                newHotspot.style.top = '50%';
-                
-                // Create associated info panel
-                const newPanel = document.createElement('div');
-                newPanel.classList.add('info-panel');
-                newPanel.id = `panel${hotspotCount}`;
-                
-                const infoContent = document.createElement('div');
-                infoContent.classList.add('info-content');
-                
-                const closeBtn = document.createElement('span');
-                closeBtn.classList.add('close-btn');
-                closeBtn.innerHTML = '&times;';
-                closeBtn.addEventListener('click', function(e) {
-                    newPanel.style.display = 'none';
-                    e.stopPropagation();
-                });
-                
-                const infoText = document.createElement('div');
-                infoText.classList.add('info-text');
-                infoText.innerHTML = `<b>New Hotspot ${hotspotCount}</b><br>Double-tap to edit this text.`;
-                
-                infoContent.appendChild(closeBtn);
-                infoContent.appendChild(infoText);
-                newPanel.appendChild(infoContent);
-                
-                // Add to container
-                hotspotsContainer.appendChild(newHotspot);
-                hotspotsContainer.appendChild(newPanel);
-                
-                // Make draggable
-                makeDraggable(newHotspot);
-                
-                // Prevent panel closing when clicking on it
-                newPanel.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             });
