@@ -192,42 +192,14 @@
             align-items: center;
         }
         
-        #move-up {
-            grid-column: 2;
-            grid-row: 1;
-        }
+        #move-up { grid-column: 2; grid-row: 1; }
+        #move-left { grid-column: 1; grid-row: 2; }
+        #move-center { grid-column: 2; grid-row: 2; }
+        #move-right { grid-column: 3; grid-row: 2; }
+        #move-down { grid-column: 2; grid-row: 3; }
+        #move-forward { grid-column: 1; grid-row: 1; }
+        #move-backward { grid-column: 3; grid-row: 3; }
         
-        #move-left {
-            grid-column: 1;
-            grid-row: 2;
-        }
-        
-        #move-center {
-            grid-column: 2;
-            grid-row: 2;
-        }
-        
-        #move-right {
-            grid-column: 3;
-            grid-row: 2;
-        }
-        
-        #move-down {
-            grid-column: 2;
-            grid-row: 3;
-        }
-        
-        #move-forward {
-            grid-column: 1;
-            grid-row: 1;
-        }
-        
-        #move-backward {
-            grid-column: 3;
-            grid-row: 3;
-        }
-        
-        /* Fix for A-Frame canvas */
         .a-canvas {
             background-color: transparent !important;
         }
@@ -236,10 +208,54 @@
             position: relative;
         }
         
+        /* Make hotspots more tappable */
+        .hotspot {
+            cursor: pointer !important;
+        }
+        
+        /* Adjust cursor appearance for better visibility */
+        .a-cursor {
+            opacity: 0.7 !important;
+        }
+        
+        /* Fake hotspot buttons overlay for Android compatibility */
+        .hotspot-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9;
+            pointer-events: none;
+        }
+        
+        .hotspot-button {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.01);
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
         @media (max-width: 768px) {
             .info-panel {
                 width: 80%;
                 max-width: none;
+            }
+            
+            .hotspot-button {
+                width: 60px; /* Larger touch target on mobile */
+                height: 60px;
+            }
+        }
+        
+        /* Fix for Android specific issues */
+        @supports (-webkit-appearance:none) and (not (overflow:-webkit-marquee)) and (not (-ms-ime-align:auto)) and (not (-moz-appearance:none)) {
+            .hotspot-button {
+                background-color: rgba(255, 255, 255, 0.2); /* Slightly visible on Android for debugging */
             }
         }
     </style>
@@ -255,12 +271,12 @@
 
     <!-- A-Frame Scene (without AR tracking) -->
     <div class="a-frame-container">
-        <a-scene embedded transparent="true" vr-mode-ui="enabled: false" cursor="rayOrigin: mouse">
+        <a-scene embedded transparent="true" vr-mode-ui="enabled: false" cursor="rayOrigin: mouse; fuse: false; fuseTimeout: 500">
             <!-- Custom cursor for interaction -->
             <a-entity camera look-controls="pointerLockEnabled: false" wasd-controls="enabled: false" position="0 1.6 0">
-                <a-entity cursor="fuse: false" position="0 0 -1"
+                <a-entity cursor="fuse: false; fuseTimeout: 500" position="0 0 -1"
                           geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
-                          material="color: white; shader: flat" raycaster="objects: .clickable"></a-entity>
+                          material="color: white; shader: flat" raycaster="objects: .clickable; far: 20; interval: 100"></a-entity>
             </a-entity>
             
             <!-- This entity will hold our image -->
